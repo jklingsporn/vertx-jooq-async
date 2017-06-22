@@ -21,7 +21,7 @@ public class VertxGeneratorTest {
 
     @Test
     public void generateCodeShouldSucceed() throws Exception {
-        Configuration configuration = TestTool.createGeneratorConfig(
+        Configuration configuration = TestTool.createGeneratorConfigMysql(
                 ClassicAsyncVertxGenerator.class.getName(),"classic.async.vertx", ClassicAsyncGeneratorStrategy.class);
         try {
             GenerationTool.generate(configuration);

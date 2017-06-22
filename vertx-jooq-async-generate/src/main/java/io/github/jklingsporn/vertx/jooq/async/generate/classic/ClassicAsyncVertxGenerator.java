@@ -1,7 +1,9 @@
 package io.github.jklingsporn.vertx.jooq.async.generate.classic;
 
 import io.github.jklingsporn.vertx.jooq.async.generate.AbstractVertxGenerator;
+import org.jooq.util.GeneratorStrategy;
 import org.jooq.util.JavaWriter;
+import org.jooq.util.TableDefinition;
 
 import java.util.List;
 
@@ -10,13 +12,13 @@ import java.util.List;
  */
 public class ClassicAsyncVertxGenerator extends AbstractVertxGenerator {
 
-    public static final String VERTX_DAO_NAME = "VertxDAO";
+    public static final String VERTX_DAO_NAME = "io.github.jklingsporn.vertx.jooq.async.classic.VertxDAO";
 
     @Override
     protected void generateDAOImports(JavaWriter out) {
         out.println("import io.vertx.core.Handler;");
         out.println("import io.vertx.core.AsyncResult;");
-        out.println("import AsyncJooqSQLClient;");
+        out.println("import io.github.jklingsporn.vertx.jooq.async.classic.AsyncJooqSQLClient;");
     }
 
     @Override
@@ -24,7 +26,7 @@ public class ClassicAsyncVertxGenerator extends AbstractVertxGenerator {
         out.tab(1).javadoc("Fetch a unique record that has <code>%s = value</code> asynchronously", colName);
 
         out.tab(1).println("public void fetchOneBy%sAsync(%s value,Handler<AsyncResult<%s>> resultHandler) {", colClass, colType,pType);
-        out.tab(2).println("vertx().executeBlocking(h->h.complete(fetchOneBy%s(value)),resultHandler);", colClass);
+        out.tab(2).println("fetchOneAsync(%s,value,resultHandler);", colIdentifier);
         out.tab(1).println("}");
     }
 
@@ -35,5 +37,42 @@ public class ClassicAsyncVertxGenerator extends AbstractVertxGenerator {
         //out.tab(2).println("return fetch(%s, values);", colIdentifier);
         out.tab(2).println("fetchAsync(%s,values,resultHandler);", colIdentifier);
         out.tab(1).println("}");
+    }
+
+    @Override
+    protected void generateVertxGetterAndSetterConfigurationMethod(JavaWriter out) {
+        //nothing
+    }
+
+    @Override
+    protected void generateDaoClassFooter(TableDefinition table, JavaWriter out) {
+        super.generateDaoClassFooter(table, out);
+        generateClientGetterAndSetter(out);
+        generateJsonMapper(table,out);
+    }
+
+    protected void generateClientGetterAndSetter(JavaWriter out) {
+        out.println();
+        out.tab(1).println("private AsyncJooqSQLClient client;");
+        out.println();
+        generateSetVertxAnnotation(out);
+        out.tab(1).println("@Override");
+        out.tab(1).println("public void setClient(AsyncJooqSQLClient client) {");
+        out.tab(2).println("this.client = client;");
+        out.tab(1).println("}");
+        out.println();
+        out.tab(1).println("@Override");
+        out.tab(1).println("public AsyncJooqSQLClient client() {");
+        out.tab(2).println("return this.client;");
+        out.tab(1).println("}");
+        out.println();
+    }
+
+    protected void generateJsonMapper(TableDefinition table, JavaWriter out){
+        out.tab(1).println("@Override");
+        out.tab(1).println("public java.util.function.Function<JsonObject, %s> jsonMapper() {", getStrategy().getFullJavaClassName(table, GeneratorStrategy.Mode.POJO));
+        out.tab(2).println("return %s::new;", getStrategy().getFullJavaClassName(table, GeneratorStrategy.Mode.POJO));
+        out.tab(1).println("}");
+        out.println();
     }
 }

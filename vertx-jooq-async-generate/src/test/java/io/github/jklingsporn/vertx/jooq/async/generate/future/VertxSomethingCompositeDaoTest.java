@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Created by jensklingsporn on 02.11.16.
  */
-public class VertxSomethingCompositeDaoTest extends VertxAsyncDaoTestBase {
+public class VertxSomethingCompositeDaoTest extends VertxDaoTestBase {
 
     @Test
     public void asyncCRUDShouldSucceed() throws InterruptedException {

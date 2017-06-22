@@ -12,12 +12,12 @@ import java.util.List;
  */
 public class FutureAsyncVertxGenerator extends AbstractVertxGenerator {
 
-    public static final String VERTX_DAO_NAME = "VertxDAO";
+    public static final String VERTX_DAO_NAME = "io.github.jklingsporn.vertx.jooq.async.future.VertxDAO";
 
     @Override
     protected void generateDAOImports(JavaWriter out) {
         out.println("import java.util.concurrent.CompletableFuture;");
-        out.println("import AsyncJooqSQLClient;");
+        out.println("import io.github.jklingsporn.vertx.jooq.async.future.AsyncJooqSQLClient;");
     }
 
     @Override

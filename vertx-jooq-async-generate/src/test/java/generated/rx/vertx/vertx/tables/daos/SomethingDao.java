@@ -19,6 +19,7 @@ import org.jooq.Configuration;
 import org.jooq.impl.DAOImpl;
 
 
+import rx.Completable;
 import rx.Observable;
 import rx.Single;
 import io.github.jklingsporn.vertx.jooq.async.rx.util.RXTool;

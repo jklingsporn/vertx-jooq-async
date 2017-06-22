@@ -23,7 +23,7 @@ public class RXVertxGuiceGenerator extends AbstractVertxGuiceGenerator {
         out.println("import rx.Completable;");
         out.println("import rx.Observable;");
         out.println("import rx.Single;");
-        out.println("import RXTool;");
+        out.println("import io.github.jklingsporn.vertx.jooq.async.rx.util.RXTool;");
     }
 
     @Override

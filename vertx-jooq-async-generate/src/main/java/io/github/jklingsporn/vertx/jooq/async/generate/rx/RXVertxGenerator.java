@@ -10,14 +10,14 @@ import java.util.List;
  */
 public class RXVertxGenerator extends AbstractVertxGenerator {
 
-    public static final String VERTX_DAO_NAME = "VertxDAO";
+    public static final String VERTX_DAO_NAME = "io.github.jklingsporn.vertx.jooq.async.rx.VertxDAO";
 
     @Override
     protected void generateDAOImports(JavaWriter out) {
         out.println("import rx.Completable;");
         out.println("import rx.Observable;");
         out.println("import rx.Single;");
-        out.println("import RXTool;");
+        out.println("import io.github.jklingsporn.vertx.jooq.async.rx.util.RXTool;");
     }
 
     @Override

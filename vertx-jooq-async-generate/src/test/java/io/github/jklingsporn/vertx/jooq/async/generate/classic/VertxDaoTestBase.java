@@ -1,11 +1,13 @@
 package io.github.jklingsporn.vertx.jooq.async.generate.classic;
 
-import generated.classic.vertx.vertx.tables.daos.SomethingDao;
-import generated.classic.vertx.vertx.tables.daos.SomethingcompositeDao;
-import io.github.jklingsporn.vertx.jooq.async.generate.TestTool;
+import generated.classic.async.vertx.tables.daos.SomethingDao;
+import generated.classic.async.vertx.tables.daos.SomethingcompositeDao;
+import io.github.jklingsporn.vertx.jooq.async.classic.AsyncJooqSQLClient;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.asyncsql.MySQLClient;
 import org.jooq.Configuration;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DefaultConfiguration;
@@ -28,16 +30,18 @@ public class VertxDaoTestBase {
 
     @BeforeClass
     public static void beforeClass() throws SQLException {
-        TestTool.setupDB();
+//        TestTool.setupMysqlDB();
         Configuration configuration = new DefaultConfiguration();
-        configuration.set(SQLDialect.HSQLDB);
-        configuration.set(DriverManager.getConnection("jdbc:hsqldb:mem:test", "test", ""));
+        configuration.set(SQLDialect.MYSQL);
+        configuration.set(DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/vertx", "vertx", ""));
 
+        JsonObject config = new JsonObject().put("host", "127.0.0.1").put("username", "vertx").putNull("password").put("database","vertx");
         dao = new SomethingDao(configuration);
-        dao.setVertx(Vertx.vertx());
+        Vertx vertx = Vertx.vertx();
+        dao.setClient(AsyncJooqSQLClient.create(vertx, MySQLClient.createNonShared(vertx, config)));
 
         compositeDao = new SomethingcompositeDao(configuration);
-        compositeDao.setVertx(Vertx.vertx());
+        compositeDao.setClient(AsyncJooqSQLClient.create(vertx, MySQLClient.createNonShared(vertx, config)));
     }
 
     protected void await(CountDownLatch latch) throws InterruptedException {

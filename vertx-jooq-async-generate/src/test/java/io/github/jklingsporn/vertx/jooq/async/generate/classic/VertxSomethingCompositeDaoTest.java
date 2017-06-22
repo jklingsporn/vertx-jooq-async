@@ -1,7 +1,7 @@
 package io.github.jklingsporn.vertx.jooq.async.generate.classic;
 
-import generated.classic.vertx.vertx.tables.pojos.Somethingcomposite;
-import generated.classic.vertx.vertx.tables.records.SomethingcompositeRecord;
+import generated.classic.async.vertx.tables.pojos.Somethingcomposite;
+import generated.classic.async.vertx.tables.records.SomethingcompositeRecord;
 import io.vertx.core.json.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,25 +12,6 @@ import java.util.concurrent.CountDownLatch;
  * Created by jensklingsporn on 02.11.16.
  */
 public class VertxSomethingCompositeDaoTest extends VertxDaoTestBase {
-
-    @Test
-    public void asyncCRUDShouldSucceed() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(1);
-        Somethingcomposite something = createSomething(0, 0);
-        compositeDao.insertAsync(something, countdownLatchHandler(latch));
-        await(latch);
-        final CountDownLatch latch2 = new CountDownLatch(1);
-        SomethingcompositeRecord somethingcompositeRecord = new SomethingcompositeRecord();
-        somethingcompositeRecord.from(something);
-        compositeDao.findByIdAsync(somethingcompositeRecord.key(),
-                consumeOrFailHandler(fetchHandler -> {
-                    something.getSomejsonobject().put("foo","bar");
-                    compositeDao.updateAsync(something,
-                            consumeOrFailHandler(updateHandler -> compositeDao.deleteByIdAsync(somethingcompositeRecord.key(), countdownLatchHandler(latch2)))
-                    );
-                }));
-        await(latch2);
-    }
 
 
     @Test
