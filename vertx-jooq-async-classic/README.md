@@ -134,14 +134,14 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
                           <!-- Convert varchar column with name 'someJsonObject' to a io.vertx.core.json.JsonObject-->
                           <forcedType>
                               <userType>io.vertx.core.json.JsonObject</userType>
-                              <converter>io.github.jklingsporn.vertx.jooq.shared.JsonObjectConverter</converter>
+                              <converter>JsonObjectConverter</converter>
                               <expression>someJsonObject</expression>
                               <types>.*</types>
                           </forcedType>
                           <!-- Convert varchar column with name 'someJsonArray' to a io.vertx.core.json.JsonArray-->
                           <forcedType>
                               <userType>io.vertx.core.json.JsonArray</userType>
-                              <converter>io.github.jklingsporn.vertx.jooq.shared.JsonArrayConverter</converter>
+                              <converter>JsonArrayConverter</converter>
                               <expression>someJsonArray</expression>
                               <types>.*</types>
                           </forcedType>

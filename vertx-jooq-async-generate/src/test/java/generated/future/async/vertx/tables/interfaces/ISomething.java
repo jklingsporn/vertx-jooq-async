@@ -4,7 +4,9 @@
 package generated.future.async.vertx.tables.interfaces;
 
 
-import io.github.jklingsporn.vertx.jooq.shared.VertxPojo;
+import io.github.jklingsporn.vertx.jooq.async.shared.JsonArrayConverter;
+import io.github.jklingsporn.vertx.jooq.async.shared.JsonObjectConverter;
+import io.github.jklingsporn.vertx.jooq.async.shared.VertxPojo;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -139,8 +141,8 @@ public interface ISomething extends VertxPojo, Serializable {
         setSomeregularnumber(json.getInteger("someRegularNumber"));
         setSomedouble(json.getDouble("someDouble"));
         setSomeenum(json.getString("someEnum"));
-        setSomejsonobject(new io.github.jklingsporn.vertx.jooq.shared.JsonObjectConverter().from(json.getString("someJsonObject")));
-        setSomejsonarray(new io.github.jklingsporn.vertx.jooq.shared.JsonArrayConverter().from(json.getString("someJsonArray")));
+        setSomejsonobject(new JsonObjectConverter().from(json.getString("someJsonObject")));
+        setSomejsonarray(new JsonArrayConverter().from(json.getString("someJsonArray")));
         return this;
     }
 

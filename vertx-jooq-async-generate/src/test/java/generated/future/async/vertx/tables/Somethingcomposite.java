@@ -8,7 +8,7 @@ import generated.future.async.vertx.DefaultSchema;
 import generated.future.async.vertx.Keys;
 import generated.future.async.vertx.tables.records.SomethingcompositeRecord;
 
-import io.github.jklingsporn.vertx.jooq.shared.JsonObjectConverter;
+import io.github.jklingsporn.vertx.jooq.async.shared.JsonObjectConverter;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Arrays;

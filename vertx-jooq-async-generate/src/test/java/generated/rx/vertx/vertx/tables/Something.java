@@ -8,8 +8,8 @@ import generated.rx.vertx.vertx.Keys;
 import generated.rx.vertx.vertx.Vertx;
 import generated.rx.vertx.vertx.tables.records.SomethingRecord;
 
-import io.github.jklingsporn.vertx.jooq.shared.JsonArrayConverter;
-import io.github.jklingsporn.vertx.jooq.shared.JsonObjectConverter;
+import io.github.jklingsporn.vertx.jooq.async.shared.JsonArrayConverter;
+import io.github.jklingsporn.vertx.jooq.async.shared.JsonObjectConverter;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 

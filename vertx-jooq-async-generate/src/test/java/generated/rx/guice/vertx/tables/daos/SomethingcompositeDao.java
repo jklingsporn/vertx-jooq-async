@@ -6,7 +6,7 @@ package generated.rx.guice.vertx.tables.daos;
 
 import generated.rx.guice.vertx.tables.Somethingcomposite;
 import generated.rx.guice.vertx.tables.records.SomethingcompositeRecord;
-import io.github.jklingsporn.vertx.jooq.rx.VertxDAO;
+import io.github.jklingsporn.vertx.jooq.async.rx.VertxDAO;
 import io.vertx.core.json.JsonObject;
 import org.jooq.Configuration;
 import org.jooq.Record2;

@@ -6,7 +6,7 @@ package generated.classic.vertx.vertx.tables.daos;
 
 import generated.classic.vertx.vertx.tables.Somethingcomposite;
 import generated.classic.vertx.vertx.tables.records.SomethingcompositeRecord;
-import io.github.jklingsporn.vertx.jooq.classic.async.VertxDAO;
+import io.github.jklingsporn.vertx.jooq.async.classic.VertxDAO;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;

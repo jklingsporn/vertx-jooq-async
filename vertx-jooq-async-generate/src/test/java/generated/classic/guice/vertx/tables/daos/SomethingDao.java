@@ -7,7 +7,7 @@ package generated.classic.guice.vertx.tables.daos;
 import generated.classic.guice.vertx.tables.Something;
 import generated.classic.guice.vertx.tables.records.SomethingRecord;
 
-import io.github.jklingsporn.vertx.jooq.classic.async.VertxDAO;
+import io.github.jklingsporn.vertx.jooq.async.classic.VertxDAO;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
