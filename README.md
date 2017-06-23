@@ -64,9 +64,9 @@ It has some limitations which you need to be aware about (see [known issues](htt
 - a RX Java based API
 
 Depending on your needs, you have to include one of the following dependencies into your pom:
-- [`vertx-jooq-async-classic`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-classic) is the module containing the callback handler API.
-- [`vertx-jooq-async-future`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-future) is the module containing the `CompletableFuture` based API.
-- [`vertx-jooq-async-rx`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-rx) is the module containing the RX Java based API
+- [`vertx-jooq-async-classic`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-async-classic) is the module containing the callback handler API.
+- [`vertx-jooq-async-future`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-async-future) is the module containing the `CompletableFuture` based API.
+- [`vertx-jooq-async-rx`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-async-rx) is the module containing the RX Java based API
 
 
 # maven
