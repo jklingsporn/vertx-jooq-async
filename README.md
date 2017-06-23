@@ -21,13 +21,13 @@ JsonObject config = new JsonObject().put("host", "127.0.0.1").put("username", "v
 AsyncJooqSQLClient client = AsyncJooqSQLClient.create(vertx,MySQLClient.createNonShared(vertx, config))
 
 //instantiate a DAO (which is generated for you)
-SomethingDao somethingDao = new SomethingDao(configuration);
-somethingDao.setVertx(vertx);
-somethingDao.setClient(client);
+SomethingDao dao = new SomethingDao(configuration);
+dao.setVertx(vertx);
+dao.setClient(client);
 
 //fetch something with ID 123...
 CompletableFuture<Void> sendFuture =
-    somethingDao.findByIdAsync(123).
+    dao.findByIdAsync(123).
     thenAccept(something->
         vertx.eventBus().send("sendSomething",something.toJson())
     );
@@ -40,10 +40,10 @@ vertx.eventBus().<JsonObject>consumer("sendSomething", jsonEvent->{
     //... change some values
     something.setSomeregularnumber(456);
     //... and update it into the DB
-    CompletableFuture<Void> updatedFuture = somethingDao.updateAsync(something);
+    CompletableFuture<Void> updatedFuture = dao.updateAsync(something);
 
     //or do you prefer writing your own typesafe SQL?
-    CompletableFuture<Something> selectFuture = somethingDao.client().fetchOne(DSL.using(dao.configuration()).selectFrom(Tables.SOMETHING).orderBy(Tables.SOMETHING.SOMEID.desc()).limit(1),somethingDao.jsonMapper());
+    CompletableFuture<Something> selectFuture = dao.client().fetchOne(DSL.using(dao.configuration()).selectFrom(Tables.SOMETHING).orderBy(Tables.SOMETHING.SOMEID.desc()).limit(1),dao.jsonMapper());
     //check for completion
     selectFuture.whenComplete((something,ex)->{
         if(ex==null){
