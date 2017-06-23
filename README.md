@@ -1,27 +1,29 @@
 # vertx-jooq-async
-A [jOOQ](http://www.jooq.org/)-CodeGenerator to create [vertx](http://vertx.io/)-ified DAOs and POJOs!
-Perform all CRUD-operations asynchronously and convert your POJOs
-from/into a `io.vertx.core.JsonObject`.
+The _real_ async version of [vertx-jooq](https://github.com/jklingsporn/vertx-jooq-async): a [jOOQ](http://www.jooq.org/)-CodeGenerator to create [vertx](http://vertx.io/)-ified DAOs and POJOs!
+This time with a [_real_ asynchronous driver](https://github.com/mauricio/postgresql-async)
+that is available for Vertx and therefore perfectly qualifies for another API. That's right - no JDBC.
 
-## new in 3.0
-[Some](http://mikemainguy.blogspot.de/2015/05/the-myth-of-asynchronous-jdbc.html)[people](https://twitter.com/ankinson/status/861343338531782657)
-have argued that wrapping JDBC calls in an asynchronous API only shifts the blocking part from one thread pool to another.
-And they are right. Luckily, there exists a [_real_ asynchronous driver](https://github.com/mauricio/postgresql-async)
-that is also available for Vertx and therefore perfectly qualifies for another API: `vertx-jooq-async-future`. Checkout
-the modules [readme](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-future) to learn more about it.
-
+## differences to vertx-jooq
+This project uses jOOQ for code-generation and to render queries. The query execution is done by the `AsyncJooqSQLClient`
+which wraps a `io.vertx.ext.asyncsql.AsyncSQLClient`.
 
 ## example
 ```
 //Setup your jOOQ configuration
-Configuration configuration = ...
+Configuration configuration = new DefaultConfiguration();
+configuration.set(SQLDialect.MYSQL); //or SQLDialect.POSTGRES
+//no other DB-Configuration necessary because we only use jOOQ to render our statements - not for excecution
 
 //setup Vertx
 Vertx vertx = Vertx.vertx();
+//setup the client
+JsonObject config = new JsonObject().put("host", "127.0.0.1").put("username", "vertx").putNull("password").put("database","vertx");
+AsyncJooqSQLClient client = AsyncJooqSQLClient.create(vertx,MySQLClient.createNonShared(vertx, config))
 
 //instantiate a DAO (which is generated for you)
 SomethingDao somethingDao = new SomethingDao(configuration);
 somethingDao.setVertx(vertx);
+somethingDao.setClient(client);
 
 //fetch something with ID 123...
 CompletableFuture<Void> sendFuture =
@@ -55,31 +57,25 @@ vertx.eventBus().<JsonObject>consumer("sendSomething", jsonEvent->{
 });
 ```
 
-Do you use dependency injection? In addition to the `FutureVertxGenerator`, there is also a generator with [Guice](https://github.com/google/guice) support. If you're using the `FutureVertxGuiceGenerator`,
-the `setConfiguration(org.jooq.Configuration)` and `setVertx(io.core.Vertx)` methods are annotated with `@javax.inject.Inject` and a
-Guice `Module` is created which binds all created VertxDAOs to their implementation. It plays nicely together with the [vertx-guice](https://github.com/ef-labs/vertx-guice) module that enables dependency injection for vertx.
-
 # callback? future? rx?
-Starting with version 2, this library comes in different flavors:
-- the classic callback-handler style known from versions < 2.
+Again, this library comes in different flavors:
+- the classic callback-handler style.
 - a API that returns a [vertx-ified implementation](https://github.com/cescoffier/vertx-completable-future)
 of `java.util.concurrent.CompletableFuture` for all async DAO operations and thus makes chaining your async operations easier.
 It has some limitations which you need to be aware about (see [known issues](https://github.com/jklingsporn/vertx-jooq#known-issues)).
-- a API based on `java.util.concurrent.CompletableFuture` that uses a non-blocking driver instead of JDBC
 - a RX Java based API
 
 Depending on your needs, you have to include one of the following dependencies into your pom:
-- [`vertx-jooq-classic`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-classic) is the module containing the callback handler API.
-- [`vertx-jooq-future`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-future) is the module containing the `CompletableFuture` based API.
-- [`vertx-jooq-async-future`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-future) contains a _real_ non-blocking `CompletableFuture` based API.
-- [`vertx-jooq-rx`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-rx) is the module containing the RX Java based API
+- [`vertx-jooq-async-classic`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-classic) is the module containing the callback handler API.
+- [`vertx-jooq-async-future`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-future) is the module containing the `CompletableFuture` based API.
+- [`vertx-jooq-async-rx`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-rx) is the module containing the RX Java based API
 
 
 # maven
 ```
 <dependency>
   <groupId>io.github.jklingsporn</groupId>
-  <artifactId>vertx-jooq-future</artifactId>
+  <artifactId>vertx-jooq-async-future</artifactId>
   <version>0.1</version>
 </dependency>
 ```
@@ -107,7 +103,7 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
     </dependency>
     <dependency>
       <groupId>io.github.jklingsporn</groupId>
-      <artifactId>vertx-jooq-future</artifactId>
+      <artifactId>vertx-jooq-async-future</artifactId>
       <version>0.1</version>
     </dependency>
   </dependencies>
@@ -136,7 +132,7 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
               </dependency>
               <dependency>
                   <groupId>io.github.jklingsporn</groupId>
-                  <artifactId>vertx-jooq-generate</artifactId>
+                  <artifactId>vertx-jooq-async-generate</artifactId>
                   <version>0.1</version>
               </dependency>
           </dependencies>
@@ -154,7 +150,7 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
 
               <!-- Generator parameters -->
               <generator>
-                  <name>io.github.jklingsporn.vertx.jooq.generate.future.FutureVertxGenerator</name>
+                  <name>io.github.jklingsporn.vertx.jooq.async.generate.future.FutureAsyncGeneratorStrategy</name>
                   <database>
                       <name>org.jooq.util.mysql.MySQLDatabase</name>
                       <includes>.*</includes>
@@ -170,14 +166,14 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
                           <!-- Convert varchar column with name 'someJsonObject' to a io.vertx.core.json.JsonObject-->
                           <forcedType>
                               <userType>io.vertx.core.json.JsonObject</userType>
-                              <converter>JsonObjectConverter</converter>
+                              <converter>io.github.jklingsporn.vertx.jooq.async.shared.JsonObjectConverter</converter>
                               <expression>someJsonObject</expression>
                               <types>.*</types>
                           </forcedType>
                           <!-- Convert varchar column with name 'someJsonArray' to a io.vertx.core.json.JsonArray-->
                           <forcedType>
                               <userType>io.vertx.core.json.JsonArray</userType>
-                              <converter>JsonArrayConverter</converter>
+                              <converter>Jio.github.jklingsporn.vertx.jooq.async.shared.sonArrayConverter</converter>
                               <expression>someJsonArray</expression>
                               <types>.*</types>
                           </forcedType>
@@ -196,7 +192,7 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
 
 
                   <strategy>
-                      <name>io.github.jklingsporn.vertx.jooq.generate.future.FutureGeneratorStrategy</name>
+                      <name>io.github.jklingsporn.vertx.jooq.async.generate.future.FutureAsyncGeneratorStrategy</name>
                   </strategy>
               </generator>
 
@@ -207,14 +203,10 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
 </project>
 ```
 # programmatic configuration of the code generator
-See the [TestTool](https://github.com/jklingsporn/vertx-jooq/blob/master/vertx-jooq-generate/src/test/java/io/github/jklingsporn/vertx/jooq/generate/TestTool.java)
+See the [TestTool](https://github.com/jklingsporn/vertx-jooq-async/blob/master/vertx-jooq-async-generate/src/test/java/io/github/jklingsporn/vertx/jooq/async/generate/TestTool.java)
 of how to setup the generator programmatically.
 
 # known issues
-- The [`VertxCompletableFuture`](https://github.com/cescoffier/vertx-completable-future) is not part of the vertx-core package.
-The reason behind this is that it violates the contract of `CompletableFuture#XXXAsync` methods which states that those methods should
-run on the ForkJoin-Pool if no Executor is provided. This can not be done, because it would break the threading model of Vertx. Please
-keep that in mind. If you can not tolerate this, please use the [`vertx-jooq-classic`](https://github.com/jklingsporn/vertx-jooq/tree/master/vertx-jooq-classic) dependency.
-- The generator will omit datatypes that it does not know, e.g. `java.sql.Timestamp`. To fix this, you can easily subclass the generator, handle these types and generate the code using your generator.
- See the `handleCustomTypeFromJson` and `handleCustomTypeToJson` methods in the `AbstractVertxGenerator`.
-- Since jOOQ is using JDBC under the hood, the non-blocking fashion is achieved by using the `Vertx.executeBlocking` method (not true for `vertx-jooq-async-future`).
+- `insertReturningPrimary`-method is not implemented yet.
+- only basic CRUD tested.
+
