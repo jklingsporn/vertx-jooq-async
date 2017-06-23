@@ -210,5 +210,5 @@ of how to setup the generator programmatically.
 - Only available for MySQL and Postgres.
 - Nobody can prevent you from calling one of the blocking `fetch`- or `execute`-methods on the VertxDAO or a jOOQ-query. If you
 do it, jOOQ will try to execute the query by itself using JDBC (if properly configured). So try to avoid it at any cost.
-
+- Currently no Guice support
 
