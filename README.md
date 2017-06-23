@@ -1,18 +1,18 @@
 # vertx-jooq-async
 The _real_ async version of [vertx-jooq](https://github.com/jklingsporn/vertx-jooq-async): a [jOOQ](http://www.jooq.org/)-CodeGenerator to create [vertx](http://vertx.io/)-ified DAOs and POJOs!
-This time with a [_real_ asynchronous driver](https://github.com/mauricio/postgresql-async)
-that is available for Vertx and therefore perfectly qualifies for another API. That's right - no JDBC.
+This time with a [_real_ asynchronous driver](https://github.com/mauricio/postgresql-async). That's right - no JDBC.
 
 ## differences to vertx-jooq
 This project uses jOOQ for code-generation and to render queries. The query execution is done by the `AsyncJooqSQLClient`
-which wraps a `io.vertx.ext.asyncsql.AsyncSQLClient`.
+which wraps a `io.vertx.ext.asyncsql.AsyncSQLClient`. The `executeAsync`-method has been removed from `VertxDao`, instead
+you need to call the `client()` method on the DAO to execute custom SQL-statements (see example below) on the `AsyncJooqSQLClient`.
 
 ## example
 ```
 //Setup your jOOQ configuration
 Configuration configuration = new DefaultConfiguration();
 configuration.set(SQLDialect.MYSQL); //or SQLDialect.POSTGRES
-//no other DB-Configuration necessary because we only use jOOQ to render our statements - not for excecution
+//no other DB-Configuration necessary because jOOQ is only used to render our statements - not for excecution
 
 //setup Vertx
 Vertx vertx = Vertx.vertx();
@@ -43,13 +43,11 @@ vertx.eventBus().<JsonObject>consumer("sendSomething", jsonEvent->{
     CompletableFuture<Void> updatedFuture = somethingDao.updateAsync(something);
 
     //or do you prefer writing your own typesafe SQL?
-    CompletableFuture<Integer> updatedCustomFuture = somethingDao.executeAsync(dslContext ->
-            dslContext.update(Tables.SOMETHING).set(Tables.SOMETHING.SOMEREGULARNUMBER,456).where(Tables.SOMETHING.SOMEID.eq(something.getSomeid())).execute()
-    );
+    CompletableFuture<Something> selectFuture = somethingDao.client().fetchOne(DSL.using(dao.configuration()).selectFrom(Tables.SOMETHING).orderBy(Tables.SOMETHING.SOMEID.desc()).limit(1),somethingDao.jsonMapper());
     //check for completion
-    updatedCustomFuture.whenComplete((rows,ex)->{
+    selectFuture.whenComplete((something,ex)->{
         if(ex==null){
-            System.out.println("Rows updated: "+rows);
+            System.out.println("It's something! "+something.toJson());
         }else{
             System.err.println("Something failed badly: "+ex.getMessage());
         }
@@ -208,5 +206,9 @@ of how to setup the generator programmatically.
 
 # known issues
 - `insertReturningPrimary`-method is not implemented yet.
-- only basic CRUD tested.
+- Only basic CRUD tested.
+- Only available for MySQL and Postgres.
+- Nobody can prevent you from calling one of the blocking `fetch`- or `execute`-methods on the VertxDAO or a jOOQ-query. If you
+do it, jOOQ will try to execute the query by itself using JDBC (if properly configured). So try to avoid it at any cost.
+
 
