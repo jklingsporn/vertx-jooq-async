@@ -1,5 +1,5 @@
 # vertx-jooq-async
-The _real_ async version of [vertx-jooq](https://github.com/jklingsporn/vertx-jooq-async): a [jOOQ](http://www.jooq.org/)-CodeGenerator to create [vertx](http://vertx.io/)-ified DAOs and POJOs!
+The _real_ async version of [vertx-jooq](https://github.com/jklingsporn/vertx-jooq): a [jOOQ](http://www.jooq.org/)-CodeGenerator to create [vertx](http://vertx.io/)-ified DAOs and POJOs!
 This time with a [_real_ asynchronous driver](https://github.com/mauricio/postgresql-async). That's right - no JDBC.
 
 ## differences to vertx-jooq
