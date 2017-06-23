@@ -1,9 +1,12 @@
 package io.github.jklingsporn.vertx.jooq.async.generate.rx;
 
-import generated.rx.vertx.vertx.tables.daos.SomethingDao;
-import generated.rx.vertx.vertx.tables.daos.SomethingcompositeDao;
+import generated.rx.async.vertx.tables.daos.SomethingDao;
+import generated.rx.async.vertx.tables.daos.SomethingcompositeDao;
 import io.github.jklingsporn.vertx.jooq.async.generate.TestTool;
-import io.vertx.core.Vertx;
+import io.github.jklingsporn.vertx.jooq.async.rx.AsyncJooqSQLClient;
+import io.vertx.core.json.JsonObject;
+import io.vertx.rxjava.core.Vertx;
+import io.vertx.rxjava.ext.asyncsql.MySQLClient;
 import org.jooq.Configuration;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DefaultConfiguration;
@@ -11,13 +14,13 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import rx.Subscriber;
 
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
+ * @author <a href="https://jensonjava.wordpress.com">Jens Klingsporn</a>
  */
 public class RXVertxDaoTestBase {
 
@@ -28,14 +31,15 @@ public class RXVertxDaoTestBase {
     public static void beforeClass() throws SQLException {
         TestTool.setupDB();
         Configuration configuration = new DefaultConfiguration();
-        configuration.set(SQLDialect.HSQLDB);
-        configuration.set(DriverManager.getConnection("jdbc:hsqldb:mem:test", "test", ""));
+        configuration.set(SQLDialect.MYSQL);
 
+        JsonObject config = new JsonObject().put("host", "127.0.0.1").put("username", "vertx").putNull("password").put("database","vertx");
         dao = new SomethingDao(configuration);
-        dao.setVertx(Vertx.vertx());
+        Vertx vertx = Vertx.vertx();
+        dao.setClient(AsyncJooqSQLClient.create(vertx, MySQLClient.createNonShared(vertx, config)));
 
         compositeDao = new SomethingcompositeDao(configuration);
-        compositeDao.setVertx(Vertx.vertx());
+        compositeDao.setClient(AsyncJooqSQLClient.create(vertx,MySQLClient.createNonShared(vertx, config)));
     }
 
     protected void await(CountDownLatch latch) throws InterruptedException {

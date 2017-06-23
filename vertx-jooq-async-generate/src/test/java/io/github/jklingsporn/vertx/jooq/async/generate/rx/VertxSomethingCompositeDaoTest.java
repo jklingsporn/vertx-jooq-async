@@ -1,7 +1,7 @@
 package io.github.jklingsporn.vertx.jooq.async.generate.rx;
 
-import generated.rx.vertx.vertx.tables.pojos.Somethingcomposite;
-import generated.rx.vertx.vertx.tables.records.SomethingcompositeRecord;
+import generated.rx.async.vertx.tables.pojos.Somethingcomposite;
+import generated.rx.async.vertx.tables.records.SomethingcompositeRecord;
 import io.vertx.core.json.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,8 +10,10 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
+ * @author <a href="https://jensonjava.wordpress.com">Jens Klingsporn</a>
  */
 public class VertxSomethingCompositeDaoTest extends RXVertxDaoTestBase {
+
 
     @Test
     public void asyncCRUDShouldSucceed() throws InterruptedException {
@@ -19,14 +21,15 @@ public class VertxSomethingCompositeDaoTest extends RXVertxDaoTestBase {
         Somethingcomposite something = createSomething(0, 0);
         SomethingcompositeRecord somethingcompositeRecord = new SomethingcompositeRecord();
         somethingcompositeRecord.from(something);
-        compositeDao.insertAsync(something)
-            .andThen(compositeDao.findByIdAsync(somethingcompositeRecord.key()))
-            .flatMapCompletable(fetchSomething -> {
-                fetchSomething.getSomejsonobject().put("foo", "bar");
-                return compositeDao.updateAsync(fetchSomething);
-            })
-            .andThen(compositeDao.deleteByIdAsync(somethingcompositeRecord.key()))
-            .subscribe(failOrCountDownSubscriber(latch));
+        compositeDao.insertExecAsync(something).
+                flatMap(
+                        v-> compositeDao.findByIdAsync(somethingcompositeRecord.key())).
+                flatMap(fetchSomething -> {
+                    fetchSomething.getSomejsonobject().put("foo", "bar");
+                    return compositeDao.updateExecAsync(fetchSomething);
+                }).
+                flatMap(v2->compositeDao.deleteExecAsync(somethingcompositeRecord.key())).
+                subscribe(failOrCountDownSubscriber(latch));
         await(latch);
     }
 
@@ -37,22 +40,21 @@ public class VertxSomethingCompositeDaoTest extends RXVertxDaoTestBase {
         Somethingcomposite something = createSomething(1, 1);
         SomethingcompositeRecord somethingcompositeRecord = new SomethingcompositeRecord();
         somethingcompositeRecord.from(something);
-        compositeDao.insertExecAsync(something)
-            .flatMap(
-                inserted -> {
-                    Assert.assertEquals(1L, inserted.longValue());
-                    return compositeDao.findByIdAsync(somethingcompositeRecord.key());
-                })
-            .flatMap(fetchSomething -> {
-                fetchSomething.getSomejsonobject().put("foo", "bar");
-                return compositeDao.updateExecAsync(fetchSomething);
-            })
-            .doOnSuccess(updated -> Assert.assertEquals(1L, updated.longValue()))
-            .flatMap(v -> compositeDao.deleteExecAsync(somethingcompositeRecord.key()))
-            .subscribe(failOrCountDownSubscriber(latch));
+        compositeDao.insertExecAsync(something).
+                flatMap(
+                        inserted-> {
+                            Assert.assertEquals(1L, inserted.longValue());
+                            return compositeDao.findByIdAsync(somethingcompositeRecord.key());
+                        }).
+                flatMap(fetchSomething -> {
+                    fetchSomething.getSomejsonobject().put("foo", "bar");
+                    return compositeDao.updateExecAsync(fetchSomething);
+                }).
+                doOnSuccess(updated -> Assert.assertEquals(1L, updated.longValue())).
+                flatMap(v -> compositeDao.deleteExecAsync(somethingcompositeRecord.key())).
+                subscribe(failOrCountDownSubscriber(latch));
         await(latch);
     }
-
 
     private Somethingcomposite createSomething(int someId, int someSecondId) {
         Somethingcomposite something = new Somethingcomposite();

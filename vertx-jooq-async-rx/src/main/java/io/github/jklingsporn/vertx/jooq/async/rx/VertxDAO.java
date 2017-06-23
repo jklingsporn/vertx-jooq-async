@@ -1,10 +1,9 @@
 package io.github.jklingsporn.vertx.jooq.async.rx;
 
-import io.github.jklingsporn.vertx.jooq.async.rx.util.RXTool;
-import io.vertx.core.Vertx;
+import io.github.jklingsporn.vertx.jooq.async.shared.VertxPojo;
+import io.vertx.core.json.JsonObject;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import rx.Completable;
 import rx.Observable;
 import rx.Single;
 
@@ -19,148 +18,16 @@ import static org.jooq.impl.DSL.row;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, T> {
+public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> extends DAO<R, P, T> {
 
-    io.vertx.rxjava.core.Vertx vertx();
+    AsyncJooqSQLClient client();
 
-    void setVertx(Vertx vertx);
-
-    /**
-     * Same as {@link #setVertx(io.vertx.core.Vertx)} but with the RX Java Vert.x
-     *
-     * @param vertx the RX Java vert.x instance, must not be {@code null}
-     */
-    void setVertx(io.vertx.rxjava.core.Vertx vertx);
+    void setClient(AsyncJooqSQLClient client);
 
     /**
-     * Convenience method to execute any <code>DSLContext</code>-aware Function asynchronously
-     * using this DAO's <code>configuration</code>.
-     *
-     * @param function
-     * @param <X>
-     * @return Single
+     * @return a function that maps a <code>JsonObject</code> to a Pojo. Usually just the constructor.
      */
-    default <X> Single<X> executeAsync(Function<DSLContext, X> function) {
-        return RXTool.executeBlocking(h -> h.complete(function.apply(DSL.using(configuration()))), vertx());
-    }
-
-    /**
-     * Performs an async <code>INSERT</code> statement for a given POJO
-     *
-     * @param object The POJO to be inserted
-     * @return Single which succeeds when the blocking method of this type succeeds or fails
-     * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #insert(Object)
-     */
-    default Completable insertAsync(P object) {
-        return RXTool.executeBlocking(h -> {
-            insert(object);
-            h.complete();
-        }, vertx()).toCompletable();
-    }
-
-    /**
-     * Performs an async batch <code>INSERT</code> statement for a given set of POJOs
-     *
-     * @param objects The POJOs to be inserted
-     * @return Single which succeeds when the blocking method of this type succeeds or fails
-     * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #insert(Collection)
-     */
-    default Completable insertAsync(Collection<P> objects) {
-        return RXTool.executeBlocking(h -> {
-            insert(objects);
-            h.complete();
-        }, vertx()).toCompletable();
-    }
-
-    /**
-     * Performs an async <code>UPDATE</code> statement for a given POJO
-     *
-     * @param object The POJO to be updated
-     * @return Single which succeeds when the blocking method of this type succeeds or fails
-     * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #update(Object)
-     */
-    default Completable updateAsync(P object) {
-        return RXTool.executeBlocking(h -> {
-            update(object);
-            h.complete();
-        }, vertx()).toCompletable();
-    }
-
-    /**
-     * Performs an async batch <code>UPDATE</code> statement for a given set of POJOs
-     *
-     * @param objects The POJOs to be updated
-     * @return Single which succeeds when the blocking method of this type succeeds or fails
-     * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #update(Object...)
-     */
-    default Completable updateAsync(Collection<P> objects) {
-        return RXTool.executeBlocking(h -> {
-            update(objects);
-            h.complete();
-        }, vertx()).toCompletable();
-    }
-
-    /**
-     * Performs an async <code>DELETE</code> statement for a given set of POJOs
-     *
-     * @param objects The POJOs to be deleted
-     * @return Single which succeeds when the blocking method of this type succeeds or fails
-     * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #delete(Object...)
-     */
-    default Completable deleteAsync(Collection<P> objects) {
-        return RXTool.executeBlocking(h -> {
-            delete(objects);
-            h.complete();
-        }, vertx()).toCompletable();
-    }
-
-
-    /**
-     * Performs an async <code>DELETE</code> statement for a given ID
-     *
-     * @param id The ID to be deleted
-     * @return Single which succeeds when the blocking method of this type succeeds or fails
-     * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #delete(Object...)
-     */
-    default Completable deleteByIdAsync(T id) {
-        return RXTool.executeBlocking(h -> {
-            deleteById(id);
-            h.complete();
-        }, vertx()).toCompletable();
-    }
-
-    /**
-     * Performs an async <code>DELETE</code> statement for a given set of IDs
-     *
-     * @param ids The IDs to be deleted
-     * @return Single which succeeds when the blocking method of this type succeeds or fails
-     * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #delete(Object...)
-     */
-    default Completable deleteByIdAsync(Collection<T> ids) {
-        return RXTool.executeBlocking(h -> {
-            deleteById(ids);
-            h.complete();
-        }, vertx()).toCompletable();
-    }
-
-    /**
-     * Checks if a given POJO exists asynchronously
-     *
-     * @param object The POJO whose existence is checked
-     * @return Single which succeeds when the blocking method of this type succeeds or fails
-     * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #exists(Object)
-     */
-    default Single<Boolean> existsAsync(P object) {
-        return RXTool.executeBlocking(h -> h.complete(exists(object)), vertx());
-    }
+    Function<JsonObject, P> jsonMapper();
 
     /**
      * Checks if a given ID exists asynchronously
@@ -171,7 +38,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      * @see #existsById(Object)
      */
     default Single<Boolean> existsByIdAsync(T id) {
-        return RXTool.executeBlocking(h -> h.complete(existsById(id)), vertx());
+        return findByIdAsync(id).map(p->p!=null);
     }
 
     /**
@@ -182,7 +49,9 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      * @see #count()
      */
     default Single<Long> countAsync() {
-        return RXTool.executeBlocking(h -> h.complete(count()), vertx());
+        return client().fetchOne(DSL.using(configuration()).selectCount().from(getTable()),
+                json -> json.getMap().values().stream().findFirst()).
+                map(opt -> (Long) opt.get());
     }
 
     /**
@@ -193,19 +62,9 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      * @see #findAll()
      */
     default Single<List<P>> findAllAsync() {
-        return RXTool.executeBlocking(h -> h.complete(findAll()), vertx());
+        return fetchAsync(DSL.trueCondition());
     }
 
-    /**
-     * Find all records of the underlying table asynchronously.
-     *
-     * @return Single which succeeds when the blocking method of this type succeeds or fails
-     * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #findAll()
-     */
-    default Observable<P> findAllObservable() {
-        return RXTool.executeBlockingObservable(h -> h.complete(findAll()), vertx());
-    }
 
     /**
      * Find a record of the underlying table by ID asynchronously.
@@ -216,7 +75,20 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      * @see #findById(Object)
      */
     default Single<P> findByIdAsync(T id) {
-        return RXTool.executeBlocking(h -> h.complete(findById(id)), vertx());
+        UniqueKey<?> uk = getTable().getPrimaryKey();
+        Objects.requireNonNull(uk, () -> "No primary key");
+        /**
+         * Copied from jOOQs DAOImpl#equal-method
+         */
+        TableField<? extends Record, ?>[] pk = uk.getFieldsArray();
+        Condition condition;
+        if (pk.length == 1) {
+            condition = ((Field<Object>) pk[0]).equal(pk[0].getDataType().convert(id));
+        }
+        else {
+            condition = row(pk).equal((Record) id);
+        }
+        return fetchOneAsync(condition);
     }
 
     /**
@@ -241,7 +113,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      * e.g. when more than one result is returned.
      */
     default <Z> Single<P> fetchOneAsync(Condition condition) {
-        return executeAsync(dslContext -> dslContext.selectFrom(getTable()).where(condition).fetchOne(mapper()));
+        return client().fetchOne(DSL.using(configuration()).selectFrom(getTable()).where(condition), jsonMapper());
     }
 
     /**
@@ -254,7 +126,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      * @see #fetchOptional(Field, Object)
      */
     default <Z> Single<Optional<P>> fetchOptionalAsync(Field<Z> field, Z value) {
-        return RXTool.executeBlocking(h -> h.complete(fetchOptional(field, value)), vertx());
+        return fetchOneAsync(field,value).map(Optional::ofNullable);
     }
 
     /**
@@ -281,12 +153,11 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
     default Single<List<P>> fetchAsync(Condition condition) {
-        return executeAsync(dslContext -> dslContext.selectFrom(getTable()).where(condition).fetch(mapper()));
+        return client().fetch(DSL.using(configuration()).selectFrom(getTable()).where(condition), jsonMapper());
     }
 
     default Observable<P> fetchObservable(Condition condition) {
-        return executeAsync(dslContext -> dslContext.selectFrom(getTable()).where(condition).fetch(mapper()))
-            .flatMapObservable(Observable::from);
+        return fetchAsync(condition).flatMapObservable(Observable::from);
     }
 
     /**
@@ -311,7 +182,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
         } else {
             condition = row(pk).equal((Record) id);
         }
-        return executeAsync(dslContext -> dslContext.deleteFrom(getTable()).where(condition).execute());
+        return deleteExecAsync(condition);
     }
 
     /**
@@ -323,7 +194,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
     default Single<Integer> deleteExecAsync(Condition condition) {
-        return executeAsync(dslContext -> dslContext.deleteFrom(getTable()).where(condition).execute());
+        return client().execute(DSL.using(configuration()).deleteFrom(getTable()).where(condition));
     }
 
     /**
@@ -347,10 +218,10 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      * @param object The POJO to be updated
      * @return Single which succeeds when the blocking method of this type succeeds or fails
      * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #updateAsync(Object)
      */
     default Single<Integer> updateExecAsync(P object) {
-        return executeAsync(dslContext -> dslContext.executeUpdate(dslContext.newRecord(getTable(), object)));
+        DSLContext dslContext = DSL.using(configuration());
+        return client().execute(dslContext.update(getTable()).set(dslContext.newRecord(getTable(), object)));
     }
 
     /**
@@ -360,10 +231,9 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      * @param object The POJO to be inserted
      * @return Single which succeeds when the blocking method of this type succeeds or fails
      * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
-     * @see #insertAsync(Object)
      */
     default Single<Integer> insertExecAsync(P object) {
-        return executeAsync(dslContext -> dslContext.executeInsert(dslContext.newRecord(getTable(), object)));
+        return client().execute(DSL.using(configuration()).insertInto(getTable()).values(object.toJson().getMap().values()));
     }
 
     /**
@@ -376,18 +246,19 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P, T> extends DAO<R, P, 
      */
     @SuppressWarnings("unchecked")
     default Single<T> insertReturningPrimaryAsync(P object) {
-        UniqueKey<?> key = getTable().getPrimaryKey();
-        //usually key shouldn't be null because DAO generation is omitted in such cases
-        Objects.requireNonNull(key, () -> "No primary key");
-        return executeAsync(dslContext -> {
-            R record = dslContext.insertInto(getTable()).set(dslContext.newRecord(getTable(), object)).returning(key.getFields()).fetchOne();
-            Objects.requireNonNull(record, () -> "Failed inserting record or no key");
-            Record key1 = record.key();
-            if (key1.size() == 1) {
-                return ((Record1<T>) key1).value1();
-            }
-            return (T) key1;
-        });
+        throw new UnsupportedOperationException(":(");
+//        UniqueKey<?> key = getTable().getPrimaryKey();
+//        //usually key shouldn't be null because DAO generation is omitted in such cases
+//        Objects.requireNonNull(key, () -> "No primary key");
+//        return executeAsync(dslContext -> {
+//            R record = dslContext.insertInto(getTable()).set(dslContext.newRecord(getTable(), object)).returning(key.getFields()).fetchOne();
+//            Objects.requireNonNull(record, () -> "Failed inserting record or no key");
+//            Record key1 = record.key();
+//            if (key1.size() == 1) {
+//                return ((Record1<T>) key1).value1();
+//            }
+//            return (T) key1;
+//        });
     }
 
 }

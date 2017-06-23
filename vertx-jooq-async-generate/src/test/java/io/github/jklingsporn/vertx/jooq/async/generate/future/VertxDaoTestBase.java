@@ -15,7 +15,6 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -34,10 +33,9 @@ public class VertxDaoTestBase {
 
     @BeforeClass
     public static void beforeClass() throws SQLException {
-        TestTool.setupMysqlDB();
+        TestTool.setupDB();
         Configuration configuration = new DefaultConfiguration();
         configuration.set(SQLDialect.MYSQL);
-        configuration.set(DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/vertx", "vertx", ""));
 
         JsonObject config = new JsonObject().put("host", "127.0.0.1").put("username", "vertx").putNull("password").put("database","vertx");
         dao = new SomethingDao(configuration);

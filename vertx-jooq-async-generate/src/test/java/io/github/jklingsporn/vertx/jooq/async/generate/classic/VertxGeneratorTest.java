@@ -16,12 +16,12 @@ public class VertxGeneratorTest {
 
     @BeforeClass
     public static void createTestSchema() throws SQLException {
-        TestTool.setupMysqlDB();;
+        TestTool.setupDB();;
     }
 
     @Test
     public void generateCodeShouldSucceed() throws Exception {
-        Configuration configuration = TestTool.createGeneratorConfigMysql(
+        Configuration configuration = TestTool.createGeneratorConfig(
                 ClassicAsyncVertxGenerator.class.getName(),"classic.async.vertx", ClassicAsyncGeneratorStrategy.class);
         try {
             GenerationTool.generate(configuration);

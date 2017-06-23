@@ -14,7 +14,6 @@ import org.jooq.impl.DefaultConfiguration;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -30,10 +29,9 @@ public class VertxDaoTestBase {
 
     @BeforeClass
     public static void beforeClass() throws SQLException {
-//        TestTool.setupMysqlDB();
+//        TestTool.setupDB();
         Configuration configuration = new DefaultConfiguration();
         configuration.set(SQLDialect.MYSQL);
-        configuration.set(DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/vertx", "vertx", ""));
 
         JsonObject config = new JsonObject().put("host", "127.0.0.1").put("username", "vertx").putNull("password").put("database","vertx");
         dao = new SomethingDao(configuration);

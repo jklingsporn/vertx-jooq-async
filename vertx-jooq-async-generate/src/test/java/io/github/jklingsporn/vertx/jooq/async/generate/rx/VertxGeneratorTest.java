@@ -11,6 +11,7 @@ import java.sql.SQLException;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
+ * @author <a href="https://jensonjava.wordpress.com">Jens Klingsporn</a>
  */
 public class VertxGeneratorTest {
 
@@ -22,7 +23,7 @@ public class VertxGeneratorTest {
     @Test
     public void generateCodeShouldSucceed() throws Exception {
         Configuration configuration = TestTool.createGeneratorConfig(
-                RXVertxGenerator.class.getName(),"rx.vertx",  RXGeneratorStrategy.class);
+                RXAsyncVertxGenerator.class.getName(), "rx.async.vertx", RXAsyncGeneratorStrategy.class);
         try {
             GenerationTool.generate(configuration);
             Assert.assertTrue(true);
