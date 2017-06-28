@@ -148,7 +148,7 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
 
               <!-- Generator parameters -->
               <generator>
-                  <name>io.github.jklingsporn.vertx.jooq.async.generate.future.FutureAsyncGeneratorStrategy</name>
+                  <name>io.github.jklingsporn.vertx.jooq.async.generate.future.FutureAsyncVertxGenerator</name>
                   <database>
                       <name>org.jooq.util.mysql.MySQLDatabase</name>
                       <includes>.*</includes>
