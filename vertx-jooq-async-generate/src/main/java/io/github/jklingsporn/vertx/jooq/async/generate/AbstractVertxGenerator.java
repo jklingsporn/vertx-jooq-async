@@ -182,7 +182,7 @@ public abstract class AbstractVertxGenerator extends JavaGenerator {
      * @return <code>true</code> if the column was handled.
      * @see #generateFromJson(TableDefinition, JavaWriter)
      */
-    protected boolean handleCustomTypeFromJson(TypedElementDefinition<?> column, String setter, String columnType, String javaMemberName, JavaWriter out){
+    protected boolean handleCustomTypeFromJson(ColumnDefinition column, String setter, String columnType, String javaMemberName, JavaWriter out){
         return false;
     }
 
