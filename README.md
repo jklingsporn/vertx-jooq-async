@@ -74,7 +74,7 @@ Depending on your needs, you have to include one of the following dependencies i
 <dependency>
   <groupId>io.github.jklingsporn</groupId>
   <artifactId>vertx-jooq-async-future</artifactId>
-  <version>0.1</version>
+  <version>0.2</version>
 </dependency>
 ```
 # maven code generator configuration example for mysql
@@ -102,7 +102,7 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
     <dependency>
       <groupId>io.github.jklingsporn</groupId>
       <artifactId>vertx-jooq-async-future</artifactId>
-      <version>0.1</version>
+      <version>0.2</version>
     </dependency>
   </dependencies>
   <build>
@@ -131,7 +131,7 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
               <dependency>
                   <groupId>io.github.jklingsporn</groupId>
                   <artifactId>vertx-jooq-async-generate</artifactId>
-                  <version>0.1</version>
+                  <version>0.2</version>
               </dependency>
           </dependencies>
 
