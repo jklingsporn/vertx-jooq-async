@@ -12,7 +12,7 @@
         <module>vertx-jooq-async-future</module>
     </modules>
     <properties>
-        <jooq.version>3.9.2</jooq.version>
+        <jooq.version>3.9.5</jooq.version>
         <vertx.version>3.4.2</vertx.version>
         <hsqldb.version>2.3.2</hsqldb.version>
         <junit.version>4.12</junit.version>
