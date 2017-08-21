@@ -36,12 +36,17 @@ public class TestTool {
                 "  `someJsonObject` VARCHAR(45) NULL,\n" +
                 "  `someJsonArray` VARCHAR(45) NULL,\n" +
                 "  PRIMARY KEY (`someId`));").execute();
-        connection.prepareStatement("DROP TABLE IF EXISTS somethingComposite;");
+        connection.prepareStatement("DROP TABLE IF EXISTS somethingComposite;").execute();
         connection.prepareStatement("CREATE TABLE `somethingComposite` (\n" +
                 "  `someId` INT NOT NULL,\n" +
                 "  `someSecondId` INT NOT NULL,\n" +
                 "  `someJsonObject` VARCHAR(45) NULL,\n" +
                 "  PRIMARY KEY (`someId`, `someSecondId`));\n").execute();
+        connection.prepareStatement("DROP TABLE IF EXISTS somethingWithoutJson;").execute();
+        connection.prepareStatement("CREATE TABLE `somethingWithoutJson` (\n" +
+                "  `someId` int(11) NOT NULL AUTO_INCREMENT,\n" +
+                "  `someString` varchar(45) COLLATE utf8_bin DEFAULT NULL,\n" +
+                "  PRIMARY KEY (`someId`));\n").execute();
     }
 
     private static Configuration createGeneratorConfig(String generatorName, String packageName, Class<? extends VertxGeneratorStrategy> generatorStrategy, Jdbc config, String dbType){
@@ -71,7 +76,7 @@ public class TestTool {
         databaseConfig.setName(dbType);
         databaseConfig.setInputSchema("");
         databaseConfig.setOutputSchema("");
-        databaseConfig.setIncludes("something|somethingComposite");
+        databaseConfig.setIncludes("something|somethingComposite|somethingWithoutJson");
         databaseConfig.setForcedTypes(Arrays.asList(jsonArrayType, jsonObjectType));
 
         Target targetConfig = new Target();
