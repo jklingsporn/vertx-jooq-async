@@ -8,9 +8,8 @@ import io.github.jklingsporn.vertx.jooq.async.shared.VertxPojo;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.io.Serializable;
-
 import javax.annotation.Generated;
+import java.io.Serializable;
 
 
 /**
@@ -135,7 +134,7 @@ public interface ISomething extends VertxPojo, Serializable {
         setSomeid(json.getInteger("someId"));
         setSomestring(json.getString("someString"));
         setSomehugenumber(json.getLong("someHugeNumber"));
-        setSomesmallnumber(json.getInteger("someSmallNumber").shortValue());
+        setSomesmallnumber(json.getInteger("someSmallNumber")==null?null:json.getInteger("someSmallNumber").shortValue());
         setSomeregularnumber(json.getInteger("someRegularNumber"));
         setSomedouble(json.getDouble("someDouble"));
         setSomeenum(json.getString("someEnum"));

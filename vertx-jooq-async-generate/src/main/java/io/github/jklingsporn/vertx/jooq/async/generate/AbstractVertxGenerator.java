@@ -133,9 +133,9 @@ public abstract class AbstractVertxGenerator extends JavaGenerator {
             }else if(isType(columnType, Integer.class)){
                 out.tab(2).println("%s(json.getInteger(\"%s\"));", setter, jsonName);
             }else if(isType(columnType, Short.class)){
-                out.tab(2).println("%s(json.getInteger(\"%s\").shortValue());", setter, jsonName);
+                out.tab(2).println("%s(json.getInteger(\"%s\")==null?null:json.getInteger(\"%s\").shortValue());", setter, jsonName, jsonName);
             }else if(isType(columnType, Byte.class)){
-                out.tab(2).println("%s(json.getInteger(\"%s\").byteValue());", setter, jsonName);
+                out.tab(2).println("%s(json.getInteger(\"%s\")==null?null:json.getInteger(\"%s\").byteValue());", setter,jsonName, jsonName);
             }else if(isType(columnType, Long.class)){
                 out.tab(2).println("%s(json.getLong(\"%s\"));", setter, jsonName);
             }else if(isType(columnType, Float.class)){
@@ -197,7 +197,7 @@ public abstract class AbstractVertxGenerator extends JavaGenerator {
             if(handleCustomTypeToJson(column,getter,getJavaType(column.getType()),getStrategy().getJavaMemberName(column, GeneratorStrategy.Mode.POJO), out)) {
                 //handled by user
             }else if(isEnum(table, column)){
-                out.tab(2).println("json.put(\"%s\",%s().getLiteral());", getJsonName(column),getter);
+                out.tab(2).println("json.put(\"%s\",%s()==null?null:%s().getLiteral());", getJsonName(column),getter,getter);
             } else if (isAllowedJsonType(column, columnType)){
                 out.tab(2).println("json.put(\"%s\",%s());", getJsonName(column),getter);
             }else{

@@ -135,7 +135,7 @@ public interface ISomething extends VertxPojo, Serializable {
         setSomeid(json.getInteger("someId"));
         setSomestring(json.getString("someString"));
         setSomehugenumber(json.getLong("someHugeNumber"));
-        setSomesmallnumber(json.getInteger("someSmallNumber").shortValue());
+        setSomesmallnumber(json.getInteger("someSmallNumber")==null?null:json.getInteger("someSmallNumber").shortValue());
         setSomeregularnumber(json.getInteger("someRegularNumber"));
         setSomedouble(json.getDouble("someDouble"));
         setSomeenum(json.getString("someEnum"));
