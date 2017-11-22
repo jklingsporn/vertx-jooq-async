@@ -2,10 +2,12 @@ package io.github.jklingsporn.vertx.jooq.async.generate.classic;
 
 import generated.classic.async.vertx.tables.daos.SomethingDao;
 import generated.classic.async.vertx.tables.daos.SomethingcompositeDao;
+import generated.classic.async.vertx.tables.pojos.Something;
 import io.github.jklingsporn.vertx.jooq.async.classic.AsyncJooqSQLClient;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.asyncsql.MySQLClient;
 import org.jooq.Configuration;
@@ -15,6 +17,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 
 import java.sql.SQLException;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -67,6 +70,23 @@ public class VertxDaoTestBase {
             }
         };
 
+    }
+
+    static Something createSomethingWithId(){
+        Random random = new Random();
+        Something something = new Something();
+        something.setSomeid(random.nextInt());
+        something.setSomedouble(random.nextDouble());
+        something.setSomehugenumber(random.nextLong());
+        something.setSomejsonarray(new JsonArray().add(1).add(2).add(3));
+        something.setSomejsonobject(new JsonObject().put("key", "value"));
+        something.setSomesmallnumber((short) random.nextInt(Short.MAX_VALUE));
+        something.setSomestring("my_string");
+        return something;
+    }
+
+    static Something createSomething(){
+        return createSomethingWithId().setSomeid(null);
     }
 
 }

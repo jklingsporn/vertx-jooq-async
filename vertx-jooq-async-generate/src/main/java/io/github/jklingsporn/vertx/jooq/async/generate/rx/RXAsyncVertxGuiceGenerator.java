@@ -20,9 +20,9 @@ public class RXAsyncVertxGuiceGenerator extends AbstractVertxGuiceGenerator {
 
     @Override
     protected void generateDAOImports(JavaWriter out) {
-        out.println("import rx.Completable;");
-        out.println("import rx.Observable;");
-        out.println("import rx.Single;");
+        out.println("import io.reactivex.Completable;");
+        out.println("import io.reactivex.Observable;");
+        out.println("import io.reactivex.Single;");
         out.println("import io.github.jklingsporn.vertx.jooq.async.rx.util.RXTool;");
     }
 

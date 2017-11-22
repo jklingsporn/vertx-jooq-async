@@ -4,8 +4,8 @@ import io.github.jklingsporn.vertx.jooq.async.shared.VertxPojo;
 import io.vertx.core.json.JsonObject;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import rx.Observable;
-import rx.Single;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +25,9 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
     void setClient(AsyncJooqSQLClient client);
 
     /**
-     * @return a function that maps a <code>JsonObject</code> to a Pojo. Usually just the constructor.
+     * @return a function that maps a <code>JsonObject</code> fetched from the vertx-client into a POJO.
+     * Because vertx isn't aware of any jOOQ conversions one might have configured for a field,
+     * this can differ from the POJOs from/toJson methods.
      */
     Function<JsonObject, P> jsonMapper();
 
@@ -157,7 +159,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
     }
 
     default Observable<P> fetchObservable(Condition condition) {
-        return fetchAsync(condition).flatMapObservable(Observable::from);
+        return fetchAsync(condition).flatMapObservable(Observable::fromIterable);
     }
 
     /**

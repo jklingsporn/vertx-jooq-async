@@ -24,7 +24,9 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
     void setClient(AsyncJooqSQLClient client);
 
     /**
-     * @return a function that maps a <code>JsonObject</code> to a Pojo. Usually just the constructor.
+     * @return a function that maps a <code>JsonObject</code> fetched from the vertx-client into a POJO.
+     * Because vertx isn't aware of any jOOQ conversions one might have configured for a field,
+     * this can differ from the POJOs from/toJson methods.
      */
     Function<JsonObject, P> jsonMapper();
 

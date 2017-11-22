@@ -9,6 +9,11 @@ import org.jooq.Converter;
  */
 public class JsonObjectConverter implements Converter<String,JsonObject> {
 
+    private static JsonObjectConverter INSTANCE;
+    public static JsonObjectConverter getInstance() {
+        return INSTANCE == null ? INSTANCE = new JsonObjectConverter() : INSTANCE;
+    }
+
     @Override
     public JsonObject from(String databaseObject) {
         return databaseObject==null?null:new JsonObject(databaseObject);

@@ -4,15 +4,18 @@ import generated.rx.async.vertx.tables.daos.SomethingDao;
 import generated.rx.async.vertx.tables.daos.SomethingcompositeDao;
 import io.github.jklingsporn.vertx.jooq.async.generate.TestTool;
 import io.github.jklingsporn.vertx.jooq.async.rx.AsyncJooqSQLClient;
+import io.reactivex.CompletableObserver;
+import io.reactivex.Observer;
+import io.reactivex.SingleObserver;
+import io.reactivex.disposables.Disposable;
 import io.vertx.core.json.JsonObject;
-import io.vertx.rxjava.core.Vertx;
-import io.vertx.rxjava.ext.asyncsql.MySQLClient;
+import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.ext.asyncsql.MySQLClient;
 import org.jooq.Configuration;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DefaultConfiguration;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import rx.Subscriber;
 
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
@@ -48,11 +51,16 @@ public class RXVertxDaoTestBase {
         }
     }
 
-    protected  <T> Subscriber<T> failOrCountDownSubscriber(CountDownLatch latch) {
-        return new Subscriber<T>() {
+    protected <T> Observer<T> failOrCountDownPlainObserver(CountDownLatch latch) {
+        return new Observer<T>() {
             @Override
-            public void onCompleted() {
-                latch.countDown();
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onNext(T t) {
+
             }
 
             @Override
@@ -61,9 +69,51 @@ public class RXVertxDaoTestBase {
             }
 
             @Override
-            public void onNext(T o) {
-                // Ignored.
+            public void onComplete() {
+                latch.countDown();
             }
+
+        };
+    }
+
+    protected <T> SingleObserver<T> failOrCountDownSingleObserver(CountDownLatch latch) {
+        return new SingleObserver<T>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onSuccess(T t) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                fail(e);
+            }
+
+        };
+    }
+
+    protected CompletableObserver failOrCountDownCompletableObserver(CountDownLatch latch) {
+        return new CompletableObserver() {
+
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onComplete() {
+                latch.countDown();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                fail(e);
+            }
+
         };
     }
 

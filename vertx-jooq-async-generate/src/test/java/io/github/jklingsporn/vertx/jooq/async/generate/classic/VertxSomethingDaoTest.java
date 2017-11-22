@@ -1,14 +1,10 @@
 package io.github.jklingsporn.vertx.jooq.async.generate.classic;
 
 import generated.classic.async.vertx.Tables;
-import generated.classic.async.vertx.tables.pojos.Something;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import org.jooq.impl.DSL;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -136,17 +132,6 @@ public class VertxSomethingDaoTest extends VertxDaoTestBase {
 //                }));
 //        await(latch);
 //    }
-
-    private Something createSomething(){
-        Random random = new Random();
-        Something something = new Something();
-        something.setSomedouble(random.nextDouble());
-        something.setSomehugenumber(random.nextLong());
-        something.setSomejsonarray(new JsonArray().add(1).add(2).add(3));
-        something.setSomejsonobject(new JsonObject().put("key", "value"));
-        something.setSomesmallnumber((short) random.nextInt(Short.MAX_VALUE));
-        return something;
-    }
 
 
 }

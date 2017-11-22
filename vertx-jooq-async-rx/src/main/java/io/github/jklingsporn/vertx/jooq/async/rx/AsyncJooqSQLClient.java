@@ -1,11 +1,11 @@
 package io.github.jklingsporn.vertx.jooq.async.rx;
 
 import io.github.jklingsporn.vertx.jooq.async.rx.util.AsyncJooqSQLClientImpl;
-import io.vertx.rxjava.core.Vertx;
+import io.vertx.reactivex.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.rxjava.ext.asyncsql.AsyncSQLClient;
+import io.vertx.reactivex.ext.asyncsql.AsyncSQLClient;
 import org.jooq.Query;
-import rx.Single;
+import io.reactivex.Single;
 
 import java.util.List;
 import java.util.function.Function;

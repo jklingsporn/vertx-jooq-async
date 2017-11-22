@@ -2,6 +2,7 @@ package io.github.jklingsporn.vertx.jooq.async.generate;
 
 import io.github.jklingsporn.vertx.jooq.async.shared.JsonArrayConverter;
 import io.github.jklingsporn.vertx.jooq.async.shared.JsonObjectConverter;
+import io.vertx.core.json.JsonObject;
 import org.jooq.Constants;
 import org.jooq.Record;
 import org.jooq.tools.JooqLogger;
@@ -152,14 +153,69 @@ public abstract class AbstractVertxGenerator extends JavaGenerator {
                 out.tab(2).println("%s(json.getInstant(\"%s\"));", setter, jsonName);
             }else if(isEnum(table, column)) {
                 out.tab(2).println("%s(java.util.Arrays.stream(%s.values()).filter(td -> td.getLiteral().equals(json.getString(\"%s\"))).findFirst().orElse(null));", setter, columnType, jsonName);
-            }else if(column.getType().getConverter() != null && (isType(column.getType().getConverter(),JsonObjectConverter.class) || isType(column.getType().getConverter(),JsonArrayConverter.class))) {
-                out.tab(2).println("%s(new %s().from(json.getString(\"%s\")));", setter, column.getType().getConverter(), jsonName);
+            }else if(column.getType().getConverter() != null && isType(column.getType().getConverter(),JsonObjectConverter.class)){
+                out.tab(2).println("%s(json.getJsonObject(\"%s\"));", setter, jsonName);
+            }else if(column.getType().getConverter() != null && isType(column.getType().getConverter(),JsonArrayConverter.class)){
+                out.tab(2).println("%s(json.getJsonArray(\"%s\"));", setter, jsonName);
             }else{
                 logger.warn(String.format("Omitting unrecognized type %s for column %s in table %s!",columnType,column.getName(),table.getName()));
                 out.tab(2).println(String.format("// Omitting unrecognized type %s for column %s!",columnType,column.getName()));
             }
         }
         out.tab(2).println("return this;");
+        out.tab(1).println("}");
+        out.println();
+    }
+
+    protected void generateJsonMapper(TableDefinition table, JavaWriter out){
+//        return json->
+//            new generated.classic.async.vertx.tables.pojos.Something()
+//                    .setSomeid(json.getInteger("someId"))
+//                    .setSomejsonobject(JsonObjectConverter.getInstance().from(json.getString("someJsonObject")))
+//                    ;
+        out.tab(1).println("@Override");
+
+        out.tab(1).println("public java.util.function.Function<%s, %s> jsonMapper() {", JsonObject.class.getName(),getStrategy().getFullJavaClassName(table, GeneratorStrategy.Mode.POJO));
+        out.tab(2).println("return json -> ");
+        out.tab(3).println("new %s()",getStrategy().getFullJavaClassName(table, GeneratorStrategy.Mode.POJO));
+        for (ColumnDefinition column : table.getColumns()) {
+            String setter = getStrategy().getJavaSetterName(column, GeneratorStrategy.Mode.INTERFACE);
+            String columnType = getJavaType(column.getType());
+            String jsonName = getJsonName(column);
+            if(handleCustomTypeJsonMapper(column, setter, columnType, jsonName, out)) {
+                //handled by user
+            }else if(isType(columnType, Integer.class)){
+                out.tab(5).println(".%s(json.getInteger(\"%s\"))", setter, jsonName);
+            }else if(isType(columnType, Short.class)){
+                out.tab(5).println(".%s(json.getInteger(\"%s\")==null?null:json.getInteger(\"%s\").shortValue())", setter, jsonName, jsonName);
+            }else if(isType(columnType, Byte.class)){
+                out.tab(5).println(".%s(json.getInteger(\"%s\")==null?null:json.getInteger(\"%s\").byteValue())", setter,jsonName, jsonName);
+            }else if(isType(columnType, Long.class)){
+                out.tab(5).println(".%s(json.getLong(\"%s\"))", setter, jsonName);
+            }else if(isType(columnType, Float.class)){
+                out.tab(5).println(".%s(json.getFloat(\"%s\"))", setter, jsonName);
+            }else if(isType(columnType, Double.class)){
+                out.tab(5).println(".%s(json.getDouble(\"%s\"))", setter, jsonName);
+            }else if(isType(columnType, Boolean.class)){
+                out.tab(5).println(".%s(json.getBoolean(\"%s\"))", setter, jsonName);
+            }else if(isType(columnType, String.class)){
+                out.tab(5).println(".%s(json.getString(\"%s\"))", setter, jsonName);
+            }else if(columnType.equals(byte.class.getName()+"[]")){
+                out.tab(5).println(".%s(json.getBinary(\"%s\"))", setter, jsonName);
+            }else if(isType(columnType,Instant.class)){
+                out.tab(5).println(".%s(json.getInstant(\"%s\"))", setter, jsonName);
+            }else if(isEnum(table, column)) {
+                out.tab(5).println(".%s(java.util.Arrays.stream(%s.values()).filter(td -> td.getLiteral().equals(json.getString(\"%s\"))).findFirst().orElse(null))", setter, columnType, jsonName);
+            }else if(column.getType().getConverter() != null && isType(column.getType().getConverter(),JsonObjectConverter.class)){
+                out.tab(5).println(".%s(%s.getInstance().from(json.getString(\"%s\")))", setter, JsonObjectConverter.class.getName(), jsonName);
+            }else if(column.getType().getConverter() != null && isType(column.getType().getConverter(),JsonArrayConverter.class)){
+                out.tab(5).println(".%s(%s.getInstance().from(json.getString(\"%s\")))", setter, JsonArrayConverter.class.getName(), jsonName);
+            }else{
+                logger.warn(String.format("Omitting unrecognized type %s for column %s in table %s!",columnType,column.getName(),table.getName()));
+                out.tab(5).println(String.format("// Omitting unrecognized type %s for column %s!",columnType,column.getName()));
+            }
+        }
+        out.tab(5).println(";");
         out.tab(1).println("}");
         out.println();
     }
@@ -183,6 +239,10 @@ public abstract class AbstractVertxGenerator extends JavaGenerator {
      * @see #generateFromJson(TableDefinition, JavaWriter)
      */
     protected boolean handleCustomTypeFromJson(ColumnDefinition column, String setter, String columnType, String javaMemberName, JavaWriter out){
+        return false;
+    }
+
+    protected boolean handleCustomTypeJsonMapper(ColumnDefinition column, String setter, String columnType, String javaMemberName, JavaWriter out){
         return false;
     }
 

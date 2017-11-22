@@ -1,8 +1,6 @@
 package io.github.jklingsporn.vertx.jooq.async.generate.classic;
 
 import io.github.jklingsporn.vertx.jooq.async.generate.AbstractVertxGenerator;
-import io.vertx.core.json.JsonObject;
-import org.jooq.util.GeneratorStrategy;
 import org.jooq.util.JavaWriter;
 import org.jooq.util.TableDefinition;
 
@@ -69,11 +67,4 @@ public class ClassicAsyncVertxGenerator extends AbstractVertxGenerator {
         out.println();
     }
 
-    protected void generateJsonMapper(TableDefinition table, JavaWriter out){
-        out.tab(1).println("@Override");
-        out.tab(1).println("public java.util.function.Function<%s, %s> jsonMapper() {", JsonObject.class.getName(),getStrategy().getFullJavaClassName(table, GeneratorStrategy.Mode.POJO));
-        out.tab(2).println("return %s::new;", getStrategy().getFullJavaClassName(table, GeneratorStrategy.Mode.POJO));
-        out.tab(1).println("}");
-        out.println();
-    }
 }

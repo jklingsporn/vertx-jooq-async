@@ -1,16 +1,15 @@
 package io.github.jklingsporn.vertx.jooq.async.rx.util;
 
 import io.github.jklingsporn.vertx.jooq.async.rx.AsyncJooqSQLClient;
-import io.vertx.rxjava.core.Vertx;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.UpdateResult;
-import io.vertx.rxjava.ext.asyncsql.AsyncSQLClient;
-import io.vertx.rxjava.ext.sql.SQLConnection;
+import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.ext.asyncsql.AsyncSQLClient;
+import io.vertx.reactivex.ext.sql.SQLConnection;
 import org.jooq.Param;
 import org.jooq.Query;
-import rx.Single;
-import rx.functions.Func1;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,10 +30,10 @@ public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
     }
 
     @Override
-    public <P> Single<List<P>> fetch(Query query, Function<JsonObject, P> mapper){
+    public <P> Single<List<P>> fetch(Query query, java.util.function.Function<JsonObject, P> mapper){
         return getConnection().flatMap(executeAndClose(sqlConnection ->
                 sqlConnection.rxQueryWithParams(query.getSQL(), getBindValues(query)).map(rs ->
-                    rs.getRows().stream().map(mapper).collect(Collectors.toList())
+                                rs.getRows().stream().map(mapper).collect(Collectors.toList())
                 )));
     }
 
@@ -49,9 +48,12 @@ public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
 
     @Override
     public Single<Integer> execute(Query query){
-        return getConnection().flatMap(executeAndClose(sqlConnection ->
-                sqlConnection.rxUpdateWithParams(query.getSQL(), getBindValues(query)))).
-                map(UpdateResult::getUpdated);
+        return getConnection()
+                .flatMap(executeAndClose(sqlConnection ->
+                        sqlConnection
+                                .rxUpdateWithParams(query.getSQL(), getBindValues(query))
+                                .map(UpdateResult::getUpdated))
+                );
     }
 
     private JsonArray getBindValues(Query query) {
@@ -78,8 +80,8 @@ public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
         return delegate().rxGetConnection();
     }
 
-    private <R> Func1<SQLConnection, Single<? extends R>> executeAndClose(Func1<SQLConnection, Single<? extends R>> func) {
-        return sqlConnection -> func.call(sqlConnection).doAfterTerminate(sqlConnection::close);
+    private <R> io.reactivex.functions.Function<SQLConnection, Single<? extends  R>> executeAndClose(Function<SQLConnection, Single<? extends R>> func) {
+        return sqlConnection -> func.apply(sqlConnection).doAfterTerminate(sqlConnection::close);
     }
 
     @Override

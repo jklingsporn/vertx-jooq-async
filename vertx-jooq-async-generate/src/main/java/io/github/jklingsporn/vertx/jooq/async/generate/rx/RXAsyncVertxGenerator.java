@@ -1,8 +1,6 @@
 package io.github.jklingsporn.vertx.jooq.async.generate.rx;
 
 import io.github.jklingsporn.vertx.jooq.async.generate.AbstractVertxGenerator;
-import io.vertx.core.json.JsonObject;
-import org.jooq.util.GeneratorStrategy;
 import org.jooq.util.JavaWriter;
 import org.jooq.util.TableDefinition;
 
@@ -17,9 +15,9 @@ public class RXAsyncVertxGenerator extends AbstractVertxGenerator {
 
     @Override
     protected void generateDAOImports(JavaWriter out) {
-        out.println("import rx.Completable;");
-        out.println("import rx.Observable;");
-        out.println("import rx.Single;");
+        out.println("import io.reactivex.Completable;");
+        out.println("import io.reactivex.Observable;");
+        out.println("import io.reactivex.Single;");
         out.println("import io.github.jklingsporn.vertx.jooq.async.rx.util.RXTool;");
         out.println("import io.github.jklingsporn.vertx.jooq.async.rx.AsyncJooqSQLClient;");
     }
@@ -76,11 +74,4 @@ public class RXAsyncVertxGenerator extends AbstractVertxGenerator {
         out.println();
     }
 
-    protected void generateJsonMapper(TableDefinition table, JavaWriter out){
-        out.tab(1).println("@Override");
-        out.tab(1).println("public java.util.function.Function<%s, %s> jsonMapper() {", JsonObject.class.getName(),getStrategy().getFullJavaClassName(table, GeneratorStrategy.Mode.POJO));
-        out.tab(2).println("return %s::new;", getStrategy().getFullJavaClassName(table, GeneratorStrategy.Mode.POJO));
-        out.tab(1).println("}");
-        out.println();
-    }
 }

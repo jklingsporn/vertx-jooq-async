@@ -31,7 +31,7 @@ public class VertxSomethingDaoTest extends RXVertxDaoTestBase {
                 doOnSuccess(updated -> Assert.assertEquals(1L, updated.longValue())).
                 flatMap(v -> dao.deleteExecAsync(somethingCreated.getSomeid())).
                 doOnSuccess(deleted -> Assert.assertEquals(1L, deleted.longValue())).
-                subscribe(failOrCountDownSubscriber(latch));
+                subscribe(failOrCountDownSingleObserver(latch));
         await(latch);
     }
 
@@ -47,10 +47,10 @@ public class VertxSomethingDaoTest extends RXVertxDaoTestBase {
 
                 }).
                 doOnSuccess(deletedRows -> Assert.assertEquals(1L, deletedRows.longValue())).
-                subscribe(failOrCountDownSubscriber(latch));
+                subscribe(failOrCountDownSingleObserver(latch));
         await(latch);
     }
-
+//
 //    @Test
 //    public void insertReturningShouldFailOnDuplicateKey() throws InterruptedException {
 //        CountDownLatch latch = new CountDownLatch(1);
@@ -76,7 +76,7 @@ public class VertxSomethingDaoTest extends RXVertxDaoTestBase {
 //                    .doOnSuccess(Assert::assertNotNull)
 //                    .flatMap(s -> dao.deleteExecAsync(Tables.SOMETHING.SOMEID.eq(i)))
 //            )
-//            .subscribe(failOrCountDownSubscriber(latch));
+//            .subscribe(failOrCountDownSingleObserver(latch));
 //        await(latch);
 //    }
 //
@@ -95,7 +95,7 @@ public class VertxSomethingDaoTest extends RXVertxDaoTestBase {
 //                return null;
 //            })
 //            .flatMap(n -> dao.deleteExecAsync(Tables.SOMETHING.SOMEHUGENUMBER.eq(1L)))
-//            .subscribe(failOrCountDownSubscriber(latch));
+//            .subscribe(failOrCountDownSingleObserver(latch));
 //
 //        await(latch);
 //    }
@@ -110,7 +110,7 @@ public class VertxSomethingDaoTest extends RXVertxDaoTestBase {
 //            .flatMap(i -> dao.fetchAsync(Tables.SOMETHING.SOMEHUGENUMBER.eq(1L)))
 //            .doOnSuccess(values -> Assert.assertEquals(2, values.size()))
 //            .flatMap(list -> dao.deleteExecAsync(Tables.SOMETHING.SOMEHUGENUMBER.eq(1L)))
-//            .subscribe(failOrCountDownSubscriber(latch));
+//            .subscribe(failOrCountDownSingleObserver(latch));
 //
 //        await(latch);
 //    }
@@ -125,10 +125,10 @@ public class VertxSomethingDaoTest extends RXVertxDaoTestBase {
 //        Single.zip(insert1, insert2, (i1, i2) -> i1)
 //            .flatMapObservable(i -> dao.fetchObservable(Tables.SOMETHING.SOMEHUGENUMBER.eq(1L)))
 //            .doOnNext(s -> count.getAndIncrement())
-//            .doOnCompleted(() -> dao.deleteExecAsync(Tables.SOMETHING.SOMEHUGENUMBER.eq(1L)))
-//            .subscribe(failOrCountDownSubscriber(latch));
+//            .doOnComplete(() -> dao.deleteExecAsync(Tables.SOMETHING.SOMEHUGENUMBER.eq(1L)))
+//            .subscribe(failOrCountDownPlainObserver(latch));
 //        await(latch);
-//        assertThat(count.get(), is(2));
+//        Assert.assertThat(count.get(), Is.is(2));
 //    }
 
     private Something createSomething() {
