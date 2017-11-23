@@ -4,14 +4,12 @@ import io.github.jklingsporn.vertx.jooq.async.shared.VertxPojo;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.impl.Arguments;
 import io.vertx.core.json.JsonObject;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 import static org.jooq.impl.DSL.row;
@@ -21,6 +19,8 @@ import static org.jooq.impl.DSL.row;
  * Vertx-ified version of jOOQs <code>DAO</code>-interface.
  */
 public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> extends DAO<R, P, T> {
+
+    static EnumSet<SQLDialect> INSERT_RETURNING_SUPPORT = EnumSet.of(SQLDialect.MYSQL,SQLDialect.MYSQL_5_7,SQLDialect.MYSQL_8_0);
 
     AsyncJooqSQLClient client();
 
@@ -225,9 +225,22 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @param resultHandler the resultHandler which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
+    @SuppressWarnings("unchecked")
     default void updateExecAsync(P object, Handler<AsyncResult<Integer>> resultHandler){
         DSLContext dslContext = DSL.using(configuration());
-        client().execute(dslContext.update(getTable()).set(dslContext.newRecord(getTable(), object)),resultHandler);
+        UniqueKey<R> pk = getTable().getPrimaryKey();
+        R record = dslContext.newRecord(getTable(), object);
+        Condition where = DSL.trueCondition();
+        for (TableField<R,?> tableField : pk.getFields()) {
+            //exclude primary keys from update
+            record.changed(tableField,false);
+            where = where.and(((TableField<R,Object>)tableField).eq(record.get(tableField)));
+        }
+        Map<String, Object> valuesToUpdate =
+                Arrays.stream(record.fields())
+                        .collect(HashMap::new, (m, f) -> m.put(f.getName(), f.getValue(record)), HashMap::putAll);
+
+        client().execute(dslContext.update(getTable()).set(valuesToUpdate).where(where),resultHandler);
     }
 
     /**
@@ -238,7 +251,8 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
     default void insertExecAsync(P object, Handler<AsyncResult<Integer>> resultHandler){
-        client().execute(DSL.using(configuration()).insertInto(getTable()).values(object.toJson().getMap().values()),resultHandler);
+        DSLContext dslContext = DSL.using(configuration());
+        client().execute(dslContext.insertInto(getTable()).values(dslContext.newRecord(getTable(), object).intoMap().values()), resultHandler);
     }
 
     /**
@@ -247,22 +261,29 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * will fail.
      * @param object The POJO to be inserted
      * @param resultHandler the resultHandler
+     * @throws UnsupportedOperationException in case of Postgres or when PK length > 1 or PK is not of type int or long
      */
     @SuppressWarnings("unchecked")
     default void insertReturningPrimaryAsync(P object, Handler<AsyncResult<T>> resultHandler){
-        throw new UnsupportedOperationException(":(");
-//        UniqueKey<?> key = getTable().getPrimaryKey();
-//        //usually key shouldn't be null because DAO generation is omitted in such cases
-//        Objects.requireNonNull(key,()->"No primary key");
-//        executeAsync(dslContext -> {
-//            R record = dslContext.insertInto(getTable()).set(dslContext.newRecord(getTable(), object)).returning(key.getFields()).fetchOne();
-//            Objects.requireNonNull(record, () -> "Failed inserting record or no key");
-//            Record key1 = record.key();
-//            if(key1.size() == 1){
-//                return ((Record1<T>)key1).value1();
-//            }
-//            return (T) key1;
-//        }, resultHandler);
+        Arguments.require(INSERT_RETURNING_SUPPORT.contains(configuration().dialect()), "Only MySQL supported");
+        UniqueKey<?> key = getTable().getPrimaryKey();
+        TableField<? extends Record, ?> tableField = key.getFieldsArray()[0];
+        DSLContext dslContext = DSL.using(configuration());
+        client().insertReturning(dslContext.insertInto(getTable()).set(dslContext.newRecord(getTable(), object)).returning(key.getFields()), res -> {
+                    if (res.failed()) {
+                        resultHandler.handle(Future.failedFuture(res.cause()));
+                    } else {
+                        Long result = res.result();
+                        T checkedResult;
+                        if(tableField.getType().equals(Integer.class)){
+                            checkedResult = (T) Integer.valueOf(result.intValue());
+                        }else{
+                            checkedResult = (T) result;
+                        }
+                        resultHandler.handle(Future.succeededFuture(checkedResult));
+                    }
+                }
+        );
     }
 
 }

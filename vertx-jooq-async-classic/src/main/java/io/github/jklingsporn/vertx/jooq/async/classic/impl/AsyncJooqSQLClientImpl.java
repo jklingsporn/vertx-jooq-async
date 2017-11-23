@@ -7,21 +7,28 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
 import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.sql.UpdateResult;
 import org.jooq.Param;
 import org.jooq.Query;
+import org.jooq.conf.ParamType;
+import org.jooq.exception.TooManyRowsException;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
  * Created by jensklingsporn on 13.06.17.
  */
 public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(AsyncJooqSQLClientImpl.class);
 
     private final Vertx vertx;
     private final AsyncSQLClient delegate;
@@ -35,6 +42,7 @@ public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
     public <P> void fetch(Query query, Function<JsonObject, P> mapper, Handler<AsyncResult<List<P>>> resultHandler) {
         getConnection().setHandler(sqlConnectionResult->{
             if(sqlConnectionResult.succeeded()){
+                log("Fetch", ()-> query.getSQL(ParamType.INLINED));
                 sqlConnectionResult.result().queryWithParams(
                         query.getSQL(),
                         getBindValues(query),
@@ -50,10 +58,14 @@ public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
     public <P> void fetchOne(Query query, Function<JsonObject, P> mapper, Handler<AsyncResult<P>> resultHandler) {
         getConnection().setHandler(sqlConnectionResult->{
             if(sqlConnectionResult.succeeded()){
+                log("Fetch one", ()-> query.getSQL(ParamType.INLINED));
                 sqlConnectionResult.result().queryWithParams(
                         query.getSQL(),
                         getBindValues(query),
                         executeAndClose(rs -> {
+                                    if(rs.getRows().size() > 1){
+                                        throw new TooManyRowsException(String.format("Got more than one row: %d",rs.getRows().size()));
+                                    }
                                     Optional<P> optional = rs.getRows().stream().findFirst().map(mapper);
                                     return (optional.orElseGet(() -> null));
                                 },
@@ -70,6 +82,7 @@ public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
     public void execute(Query query, Handler<AsyncResult<Integer>> resultHandler) {
         getConnection().setHandler(sqlConnectionResult->{
             if(sqlConnectionResult.succeeded()){
+                log("Execute", ()-> query.getSQL(ParamType.INLINED));
                 sqlConnectionResult.result().updateWithParams(
                         query.getSQL(),
                         getBindValues(query),
@@ -83,6 +96,29 @@ public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
         });
     }
 
+    @Override
+    public void insertReturning(Query query, Handler<AsyncResult<Long>> resultHandler) {
+        getConnection().setHandler(sqlConnectionResult->{
+            if(sqlConnectionResult.succeeded()){
+                log("Insert Returning", ()-> query.getSQL(ParamType.INLINED));
+                sqlConnectionResult.result().update(
+                        query.getSQL(ParamType.INLINED),
+                        executeAndClose(res -> res.getKeys().getLong(0),
+                                sqlConnectionResult.result(),
+                                resultHandler)
+                );
+            }else{
+                resultHandler.handle(Future.failedFuture(sqlConnectionResult.cause()));
+            }
+        });
+    }
+
+    private void log(String type, Supplier<String> messageSupplier){
+        if(logger.isDebugEnabled()){
+            logger.debug("{}: {}",type, messageSupplier.get());
+        }
+    }
+
     private <P,U> Handler<AsyncResult<U>> executeAndClose(Function<U, P> func, SQLConnection sqlConnection, Handler<AsyncResult<P>> resultHandler) {
         return rs -> {
             try{
@@ -91,6 +127,8 @@ public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
                 } else {
                     resultHandler.handle(Future.failedFuture(rs.cause()));
                 }
+            }catch(Throwable e) {
+                resultHandler.handle(Future.failedFuture(e));
             }finally {
                 sqlConnection.close();
             }

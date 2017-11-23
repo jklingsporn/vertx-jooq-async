@@ -9,6 +9,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.SLF4JLogDelegateFactory;
 import io.vertx.ext.asyncsql.MySQLClient;
 import org.jooq.Configuration;
 import org.jooq.SQLDialect;
@@ -33,6 +34,7 @@ public class VertxDaoTestBase {
     @BeforeClass
     public static void beforeClass() throws SQLException {
 //        TestTool.setupDB();
+        System.setProperty("vertx.logger-delegate-factory-class-name", SLF4JLogDelegateFactory.class.getName());
         Configuration configuration = new DefaultConfiguration();
         configuration.set(SQLDialect.MYSQL);
 
@@ -64,8 +66,14 @@ public class VertxDaoTestBase {
     protected <T> Handler<AsyncResult<T>> consumeOrFailHandler(Consumer<T> consumer){
         return h->{
             if(h.succeeded()){
-                consumer.accept(h.result());
+                try{
+                    consumer.accept(h.result());
+                }catch(Throwable e){
+                    e.printStackTrace();
+                    Assert.fail(e.getMessage());
+                }
             }else{
+                h.cause().printStackTrace();
                 Assert.fail(h.cause().getMessage());
             }
         };

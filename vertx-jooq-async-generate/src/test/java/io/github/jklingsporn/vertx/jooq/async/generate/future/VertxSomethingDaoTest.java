@@ -4,7 +4,6 @@ import generated.future.async.vertx.Tables;
 import generated.future.async.vertx.tables.pojos.Something;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.jooq.impl.DSL;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,9 +34,10 @@ public class VertxSomethingDaoTest extends VertxDaoTestBase {
     @Test
     public void insertExecShouldSucceed() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        dao.insertExecAsync(createSomething()).
+        Something somethingCreated = createSomething();
+        dao.insertExecAsync(somethingCreated).
                 thenAccept(insertedRows -> Assert.assertEquals(1L,insertedRows.longValue())).
-                thenCompose(v-> dao.client().fetchOne(DSL.using(dao.configuration()).selectFrom(Tables.SOMETHING).orderBy(Tables.SOMETHING.SOMEID.desc()).limit(1),dao.jsonMapper())).
+                thenCompose(v-> dao.fetchOneAsync(Tables.SOMETHING.SOMEHUGENUMBER.eq(somethingCreated.getSomehugenumber()))).
                 thenCompose(id -> {
                     Assert.assertNotNull(id);
                     return dao.deleteExecAsync(id.getSomeid());

@@ -1,9 +1,15 @@
 package io.github.jklingsporn.vertx.jooq.async.generate;
 
+import generated.classic.async.vertx.Tables;
+import generated.classic.async.vertx.tables.records.SomethingRecord;
 import io.github.jklingsporn.vertx.jooq.async.shared.JsonArrayConverter;
 import io.github.jklingsporn.vertx.jooq.async.shared.JsonObjectConverter;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.jooq.SQLDialect;
+import org.jooq.conf.ParamType;
+import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultConfiguration;
 import org.jooq.util.jaxb.*;
 import org.jooq.util.mysql.MySQLDatabase;
 
@@ -11,13 +17,21 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by jensklingsporn on 02.11.16.
  */
 public class TestTool {
 
+    public static final AtomicLong NUMBERS = new AtomicLong(0);
+
     private static final String TARGET_FOLDER = "src/test/java";
+
+
+    public static void main(String[] args) {
+        System.out.println(DSL.using(new DefaultConfiguration().set(SQLDialect.MYSQL)).insertInto(Tables.SOMETHING).set(new SomethingRecord().setSomeid(123).setSomeregularnumber(1234)).returning().getSQL(ParamType.INLINED));
+    }
 
     public static void setupDB() throws SQLException {
         Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/", "vertx", "");

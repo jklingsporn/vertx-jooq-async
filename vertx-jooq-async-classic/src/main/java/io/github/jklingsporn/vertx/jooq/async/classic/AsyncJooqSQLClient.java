@@ -43,6 +43,8 @@ public interface AsyncJooqSQLClient {
      */
     void execute(Query query, Handler<AsyncResult<Integer>> resultHandler);
 
+    void insertReturning(Query query, Handler<AsyncResult<Long>> resultHandler);
+
     /**
      * @return the underlying client
      */

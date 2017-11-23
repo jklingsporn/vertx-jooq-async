@@ -10,6 +10,7 @@ import org.jooq.util.*;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -41,6 +42,7 @@ public abstract class AbstractVertxGenerator extends JavaGenerator {
         super.generateDaoClassFooter(table, out);
         generateFetchMethods(table,out);
         generateVertxGetterAndSetterConfigurationMethod(out);
+        overwriteInsertReturningIfNecessary(table,out);
     }
 
     @Override
@@ -109,6 +111,26 @@ public abstract class AbstractVertxGenerator extends JavaGenerator {
         out.tab(2).println("return this.vertx;");
         out.tab(1).println("}");
         out.println();
+    }
+
+    protected void overwriteInsertReturningIfNecessary(TableDefinition table, JavaWriter out){
+        Collection<ColumnDefinition> keyColumns = table.getPrimaryKey().getKeyColumns();
+        boolean isSupported = keyColumns.size()==1;
+        String reason = "More than one PK column";
+        if(isSupported){
+            isSupported = keyColumns.stream()
+                            .map(c -> getJavaType(c.getType()))
+                            .allMatch(t -> isType(t, Integer.class) || isType(t, Long.class));
+            reason = isSupported ? "":"PK is not of type int or long";
+        }
+        if(!isSupported){
+            logger.info(String.format("insertReturningPrimaryAsync is not supported for %s because '%s'!",table.getName(),reason));
+            out.println();
+            out.tab(1).println("public void insertReturningPrimaryAsync(%s object, Handler<AsyncResult<%s>> resultHandler){",getStrategy().getJavaClassName(table, GeneratorStrategy.Mode.POJO),getKeyType(table.getPrimaryKey()));
+            out.tab(2).println("throw new UnsupportedOperationException(\"%s\");",reason);
+            out.tab(1).println("}");
+            out.println();
+        }
     }
 
     /**
