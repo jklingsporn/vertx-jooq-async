@@ -74,4 +74,9 @@ public class RXAsyncVertxGenerator extends AbstractVertxGenerator {
         out.println();
     }
 
+    @Override
+    protected void renderInsertReturningOverwrite(TableDefinition table, JavaWriter out, String reason) {
+
+    }
+
 }

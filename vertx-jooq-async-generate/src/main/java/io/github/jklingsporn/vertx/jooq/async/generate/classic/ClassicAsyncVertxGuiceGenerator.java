@@ -1,7 +1,9 @@
 package io.github.jklingsporn.vertx.jooq.async.generate.classic;
 
 import io.github.jklingsporn.vertx.jooq.async.generate.AbstractVertxGuiceGenerator;
+import org.jooq.util.GeneratorStrategy;
 import org.jooq.util.JavaWriter;
+import org.jooq.util.TableDefinition;
 
 import java.util.List;
 
@@ -22,6 +24,18 @@ public class ClassicAsyncVertxGuiceGenerator extends AbstractVertxGuiceGenerator
     protected void generateDAOImports(JavaWriter out) {
         out.println("import io.vertx.core.Handler;");
         out.println("import io.vertx.core.AsyncResult;");
+    }
+
+    @Override
+    protected void renderInsertReturningOverwrite(TableDefinition table, JavaWriter out, String reason) {
+        out.println();
+        out.tab(1).println("@Override");
+        out.tab(1).println("public void insertReturningPrimaryAsync(%s object, Handler<AsyncResult<%s>> resultHandler){",
+                out.ref(getStrategy().getFullJavaClassName(table, GeneratorStrategy.Mode.POJO)),
+                getKeyType(table.getPrimaryKey()));
+        out.tab(2).println("throw new UnsupportedOperationException(\"%s\");",reason);
+        out.tab(1).println("}");
+        out.println();
     }
 
     @Override

@@ -43,6 +43,11 @@ public class FutureAsyncVertxGenerator extends AbstractVertxGenerator {
     }
 
     @Override
+    protected void renderInsertReturningOverwrite(TableDefinition table, JavaWriter out, String reason) {
+
+    }
+
+    @Override
     protected void generateDaoClassFooter(TableDefinition table, JavaWriter out) {
         super.generateDaoClassFooter(table, out);
         generateClientGetterAndSetter(out);

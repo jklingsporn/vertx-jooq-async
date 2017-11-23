@@ -10,8 +10,6 @@ import io.github.jklingsporn.vertx.jooq.async.rx.AsyncJooqSQLClient;
 import io.github.jklingsporn.vertx.jooq.async.rx.VertxDAO;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import org.jooq.Configuration;
 import org.jooq.Record2;
@@ -116,11 +114,6 @@ public class SomethingcompositeDao extends DAOImpl<SomethingcompositeRecord, gen
     public Observable<generated.rx.async.vertx.tables.pojos.Somethingcomposite> fetchBySomejsonobjectObservable(List<JsonObject> values) {
         return fetchObservable(Somethingcomposite.SOMETHINGCOMPOSITE.SOMEJSONOBJECT,values);
     }
-
-    public void insertReturningPrimaryAsync(Somethingcomposite object, Handler<AsyncResult<Record2<Integer, Integer>>> resultHandler){
-        throw new UnsupportedOperationException("More than one PK column");
-    }
-
 
     private AsyncJooqSQLClient client;
 

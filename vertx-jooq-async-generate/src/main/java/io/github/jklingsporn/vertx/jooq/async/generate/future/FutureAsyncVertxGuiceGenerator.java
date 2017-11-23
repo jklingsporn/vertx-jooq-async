@@ -2,6 +2,7 @@ package io.github.jklingsporn.vertx.jooq.async.generate.future;
 
 import io.github.jklingsporn.vertx.jooq.async.generate.AbstractVertxGuiceGenerator;
 import org.jooq.util.JavaWriter;
+import org.jooq.util.TableDefinition;
 
 import java.util.List;
 
@@ -40,5 +41,10 @@ public class FutureAsyncVertxGuiceGenerator extends AbstractVertxGuiceGenerator 
         //out.tab(2).println("return fetch(%s, values);", colIdentifier);
         out.tab(2).println("return fetchAsync(%s,values);", colIdentifier);
         out.tab(1).println("}");
+    }
+
+    @Override
+    protected void renderInsertReturningOverwrite(TableDefinition table, JavaWriter out, String reason) {
+
     }
 }

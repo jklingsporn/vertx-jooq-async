@@ -40,6 +40,11 @@ public class VertxSomethingCompositeDaoTest extends VertxDaoTestBase {
         await(latch);
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void insertReturningShouldFailForCompositePK(){
+        compositeDao.insertReturningPrimaryAsync(createSomething(0,0), f->{});
+    }
+
 
     private Somethingcomposite createSomething(int someId, int someSecondId){
         Somethingcomposite something = new Somethingcomposite();

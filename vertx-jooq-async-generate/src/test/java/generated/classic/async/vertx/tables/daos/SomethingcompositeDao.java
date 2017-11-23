@@ -94,7 +94,8 @@ public class SomethingcompositeDao extends DAOImpl<SomethingcompositeRecord, gen
         fetchAsync(Somethingcomposite.SOMETHINGCOMPOSITE.SOMEJSONOBJECT,values,resultHandler);
     }
 
-    public void insertReturningPrimaryAsync(Somethingcomposite object, Handler<AsyncResult<org.jooq.Record2<java.lang.Integer, java.lang.Integer>>> resultHandler){
+    @Override
+    public void insertReturningPrimaryAsync(generated.classic.async.vertx.tables.pojos.Somethingcomposite object, Handler<AsyncResult<org.jooq.Record2<java.lang.Integer, java.lang.Integer>>> resultHandler){
         throw new UnsupportedOperationException("More than one PK column");
     }
 

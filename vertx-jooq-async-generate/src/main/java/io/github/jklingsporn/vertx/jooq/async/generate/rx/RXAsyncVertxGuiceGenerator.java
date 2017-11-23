@@ -2,6 +2,7 @@ package io.github.jklingsporn.vertx.jooq.async.generate.rx;
 
 import io.github.jklingsporn.vertx.jooq.async.generate.AbstractVertxGuiceGenerator;
 import org.jooq.util.JavaWriter;
+import org.jooq.util.TableDefinition;
 
 import java.util.List;
 
@@ -70,5 +71,10 @@ public class RXAsyncVertxGuiceGenerator extends AbstractVertxGuiceGenerator {
         out.tab(2).println("return this.vertx;");
         out.tab(1).println("}");
         out.println();
+    }
+
+    @Override
+    protected void renderInsertReturningOverwrite(TableDefinition table, JavaWriter out, String reason) {
+
     }
 }
