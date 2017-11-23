@@ -1,18 +1,16 @@
 package io.github.jklingsporn.vertx.jooq.async.future;
 
 import io.github.jklingsporn.vertx.jooq.async.shared.VertxPojo;
+import io.github.jklingsporn.vertx.jooq.async.shared.internal.VertxDAOHelper;
 import io.vertx.core.json.JsonObject;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-
-import static org.jooq.impl.DSL.row;
 
 /**
  * Created by jensklingsporn on 18.04.17.
@@ -73,20 +71,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @see #findById(Object)
      */
     default CompletableFuture<P> findByIdAsync(T id){
-        UniqueKey<?> uk = getTable().getPrimaryKey();
-        Objects.requireNonNull(uk, () -> "No primary key");
-        /**
-         * Copied from jOOQs DAOImpl#equal-method
-         */
-        TableField<? extends Record, ?>[] pk = uk.getFieldsArray();
-        Condition condition;
-        if (pk.length == 1) {
-            condition = ((Field<Object>) pk[0]).equal(pk[0].getDataType().convert(id));
-        }
-        else {
-            condition = row(pk).equal((Record) id);
-        }
-        return fetchOneAsync(condition);
+        return VertxDAOHelper.findByIdAsync(id, getTable(), this::fetchOneAsync);
     }
 
     /**
@@ -159,20 +144,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      */
     @SuppressWarnings("unchecked")
     default CompletableFuture<Integer> deleteExecAsync(T id){
-        UniqueKey<?> uk = getTable().getPrimaryKey();
-        Objects.requireNonNull(uk, () -> "No primary key");
-        /**
-         * Copied from jOOQs DAOImpl#equal-method
-         */
-        TableField<? extends Record, ?>[] pk = uk.getFieldsArray();
-        Condition condition;
-        if (pk.length == 1) {
-            condition = ((Field<Object>) pk[0]).equal(pk[0].getDataType().convert(id));
-        }
-        else {
-            condition = row(pk).equal((Record) id);
-        }
-        return deleteExecAsync(condition);
+        return VertxDAOHelper.deleteExecAsync(id,getTable(), this::deleteExecAsync);
     }
 
     /**
@@ -231,19 +203,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      */
     @SuppressWarnings("unchecked")
     default CompletableFuture<T> insertReturningPrimaryAsync(P object){
-        throw new UnsupportedOperationException(":(");
-//        UniqueKey<?> key = getTable().getPrimaryKey();
-//        //usually key shouldn't be null because DAO generation is omitted in such cases
-//        Objects.requireNonNull(key,()->"No primary key");
-//        Function<JsonObject,T> keyMapper=null;
-//        if(key.getFieldsArray().length==1){
-//            //this will throw exception in case no value was added
-//            keyMapper = json -> (T)json.getMap().values().stream().findFirst().get();
-//        }else{
-//            //
-//        }
-//        DSLContext dslContext = DSL.using(configuration());
-//        return client().fetchOne(dslContext.insertInto(getTable()).set(dslContext.newRecord(getTable(), object)).returning(key.getFields()),keyMapper);
+        return VertxDAOHelper.insertReturningPrimaryAsync(object, this, (query,keyConverter)-> client().insertReturning(query).thenApply(keyConverter));
     }
 
 }

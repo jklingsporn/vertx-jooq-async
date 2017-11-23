@@ -1,11 +1,11 @@
 package io.github.jklingsporn.vertx.jooq.async.rx;
 
 import io.github.jklingsporn.vertx.jooq.async.rx.util.AsyncJooqSQLClientImpl;
-import io.vertx.reactivex.core.Vertx;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.asyncsql.AsyncSQLClient;
 import org.jooq.Query;
-import io.reactivex.Single;
 
 import java.util.List;
 import java.util.function.Function;
@@ -41,6 +41,8 @@ public interface AsyncJooqSQLClient {
      * @return A Single returning the number of affected rows by this query.
      */
     Single<Integer> execute(Query query);
+
+    Single<Long> insertReturning(Query query);
 
     /**
      * @return the underlying client

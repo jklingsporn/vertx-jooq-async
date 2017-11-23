@@ -12,6 +12,7 @@ import io.vertx.ext.sql.UpdateResult;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 import org.jooq.Param;
 import org.jooq.Query;
+import org.jooq.conf.ParamType;
 
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +67,15 @@ public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
             CompletableFuture<Integer> cf = new VertxCompletableFuture<>(vertx);
             JsonArray bindValues = getBindValues(query);
             sqlConnection.updateWithParams(query.getSQL(), bindValues, executeAndClose(UpdateResult::getUpdated,sqlConnection,cf));
+            return cf;
+        });
+    }
+
+    @Override
+    public CompletableFuture<Long> insertReturning(Query query) {
+        return getConnection().thenCompose(sqlConnection -> {
+            CompletableFuture<Long> cf = new VertxCompletableFuture<>(vertx);
+            sqlConnection.update(query.getSQL(ParamType.INLINED), executeAndClose(updateResult->updateResult.getKeys().getLong(0), sqlConnection, cf));
             return cf;
         });
     }

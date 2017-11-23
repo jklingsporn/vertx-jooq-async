@@ -1,18 +1,19 @@
 package io.github.jklingsporn.vertx.jooq.async.classic;
 
 import io.github.jklingsporn.vertx.jooq.async.shared.VertxPojo;
+import io.github.jklingsporn.vertx.jooq.async.shared.internal.VertxDAOHelper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.impl.Arguments;
 import io.vertx.core.json.JsonObject;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
-
-import static org.jooq.impl.DSL.row;
 
 /**
  * Created by jensklingsporn on 21.10.16.
@@ -87,20 +88,10 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @see #findById(Object)
      */
     default void findByIdAsync(T id, Handler<AsyncResult<P>> resultHandler){
-        UniqueKey<?> uk = getTable().getPrimaryKey();
-        Objects.requireNonNull(uk, () -> "No primary key");
-        /**
-         * Copied from jOOQs DAOImpl#equal-method
-         */
-        TableField<? extends Record, ?>[] pk = uk.getFieldsArray();
-        Condition condition;
-        if (pk.length == 1) {
-            condition = ((Field<Object>) pk[0]).equal(pk[0].getDataType().convert(id));
-        }
-        else {
-            condition = row(pk).equal((Record) id);
-        }
-        fetchOneAsync(condition,resultHandler);
+        VertxDAOHelper.findByIdAsync(id, getTable(), condition -> {
+            fetchOneAsync(condition, resultHandler);
+            return null;
+        });
     }
 
     /**
@@ -177,22 +168,11 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @param resultHandler the resultHandler which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
-    @SuppressWarnings("unchecked")
     default void deleteExecAsync(T id, Handler<AsyncResult<Integer>> resultHandler){
-        UniqueKey<?> uk = getTable().getPrimaryKey();
-        Objects.requireNonNull(uk,()->"No primary key");
-        /**
-         * Copied from jOOQs DAOImpl#equal-method
-         */
-        TableField<? extends Record, ?>[] pk = uk.getFieldsArray();
-        Condition condition;
-        if (pk.length == 1) {
-            condition = ((Field<Object>) pk[0]).equal(pk[0].getDataType().convert(id));
-        }
-        else {
-            condition = row(pk).equal((Record) id);
-        }
-        deleteExecAsync(condition,resultHandler);
+        VertxDAOHelper.deleteExecAsync(id, getTable(), condition -> {
+            deleteExecAsync(condition, resultHandler);
+            return null;
+        });
     }
 
     /**
@@ -227,20 +207,10 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      */
     @SuppressWarnings("unchecked")
     default void updateExecAsync(P object, Handler<AsyncResult<Integer>> resultHandler){
-        DSLContext dslContext = DSL.using(configuration());
-        UniqueKey<R> pk = getTable().getPrimaryKey();
-        R record = dslContext.newRecord(getTable(), object);
-        Condition where = DSL.trueCondition();
-        for (TableField<R,?> tableField : pk.getFields()) {
-            //exclude primary keys from update
-            record.changed(tableField,false);
-            where = where.and(((TableField<R,Object>)tableField).eq(record.get(tableField)));
-        }
-        Map<String, Object> valuesToUpdate =
-                Arrays.stream(record.fields())
-                        .collect(HashMap::new, (m, f) -> m.put(f.getName(), f.getValue(record)), HashMap::putAll);
-
-        client().execute(dslContext.update(getTable()).set(valuesToUpdate).where(where),resultHandler);
+        VertxDAOHelper.updateExecAsync(object, this, query -> {
+            client().execute(query, resultHandler);
+            return null;
+        });
     }
 
     /**
@@ -263,27 +233,17 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @param resultHandler the resultHandler
      * @throws UnsupportedOperationException in case of Postgres or when PK length > 1 or PK is not of type int or long
      */
-    @SuppressWarnings("unchecked")
     default void insertReturningPrimaryAsync(P object, Handler<AsyncResult<T>> resultHandler){
-        Arguments.require(INSERT_RETURNING_SUPPORT.contains(configuration().dialect()), "Only MySQL supported");
-        UniqueKey<?> key = getTable().getPrimaryKey();
-        TableField<? extends Record, ?> tableField = key.getFieldsArray()[0];
-        DSLContext dslContext = DSL.using(configuration());
-        client().insertReturning(dslContext.insertInto(getTable()).set(dslContext.newRecord(getTable(), object)).returning(key.getFields()), res -> {
-                    if (res.failed()) {
-                        resultHandler.handle(Future.failedFuture(res.cause()));
-                    } else {
-                        Long result = res.result();
-                        T checkedResult;
-                        if(tableField.getType().equals(Integer.class)){
-                            checkedResult = (T) Integer.valueOf(result.intValue());
-                        }else{
-                            checkedResult = (T) result;
-                        }
-                        resultHandler.handle(Future.succeededFuture(checkedResult));
-                    }
+        VertxDAOHelper.insertReturningPrimaryAsync(object,this, (query,fun)->{
+            client().insertReturning(query,res -> {
+                if (res.failed()) {
+                    resultHandler.handle(Future.failedFuture(res.cause()));
+                } else {
+                    resultHandler.handle(Future.succeededFuture(fun.apply(res.result())));
                 }
-        );
+            });
+            return null;
+        });
     }
 
 }

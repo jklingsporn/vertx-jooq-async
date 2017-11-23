@@ -42,6 +42,8 @@ public interface AsyncJooqSQLClient {
      */
     CompletableFuture<Integer> execute(Query query);
 
+    CompletableFuture<Long> insertReturning(Query query);
+
     /**
      * @return the underlying client
      */

@@ -1,19 +1,18 @@
 package io.github.jklingsporn.vertx.jooq.async.rx;
 
+import io.github.jklingsporn.vertx.jooq.async.rx.util.RXTool;
 import io.github.jklingsporn.vertx.jooq.async.shared.VertxPojo;
+import io.github.jklingsporn.vertx.jooq.async.shared.internal.VertxDAOHelper;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import io.reactivex.Observable;
-import io.reactivex.Single;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-
-import static org.jooq.impl.DSL.row;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -77,20 +76,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @see #findById(Object)
      */
     default Single<P> findByIdAsync(T id) {
-        UniqueKey<?> uk = getTable().getPrimaryKey();
-        Objects.requireNonNull(uk, () -> "No primary key");
-        /**
-         * Copied from jOOQs DAOImpl#equal-method
-         */
-        TableField<? extends Record, ?>[] pk = uk.getFieldsArray();
-        Condition condition;
-        if (pk.length == 1) {
-            condition = ((Field<Object>) pk[0]).equal(pk[0].getDataType().convert(id));
-        }
-        else {
-            condition = row(pk).equal((Record) id);
-        }
-        return fetchOneAsync(condition);
+        return VertxDAOHelper.findByIdAsync(id,getTable(),this::fetchOneAsync);
     }
 
     /**
@@ -172,19 +158,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      */
     @SuppressWarnings("unchecked")
     default Single<Integer> deleteExecAsync(T id) {
-        UniqueKey<?> uk = getTable().getPrimaryKey();
-        Objects.requireNonNull(uk, () -> "No primary key");
-        /*
-         * Copied from jOOQs DAOImpl#equal-method
-         */
-        TableField<? extends Record, ?>[] pk = uk.getFieldsArray();
-        Condition condition;
-        if (pk.length == 1) {
-            condition = ((Field<Object>) pk[0]).equal(pk[0].getDataType().convert(id));
-        } else {
-            condition = row(pk).equal((Record) id);
-        }
-        return deleteExecAsync(condition);
+        return VertxDAOHelper.deleteExecAsync(id, getTable(), this::deleteExecAsync);
     }
 
     /**
@@ -222,8 +196,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
     default Single<Integer> updateExecAsync(P object) {
-        DSLContext dslContext = DSL.using(configuration());
-        return client().execute(dslContext.update(getTable()).set(dslContext.newRecord(getTable(), object)));
+        return VertxDAOHelper.updateExecAsync(object,this, query-> client().execute(query));
     }
 
     /**
@@ -248,19 +221,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      */
     @SuppressWarnings("unchecked")
     default Single<T> insertReturningPrimaryAsync(P object) {
-        throw new UnsupportedOperationException(":(");
-//        UniqueKey<?> key = getTable().getPrimaryKey();
-//        //usually key shouldn't be null because DAO generation is omitted in such cases
-//        Objects.requireNonNull(key, () -> "No primary key");
-//        return executeAsync(dslContext -> {
-//            R record = dslContext.insertInto(getTable()).set(dslContext.newRecord(getTable(), object)).returning(key.getFields()).fetchOne();
-//            Objects.requireNonNull(record, () -> "Failed inserting record or no key");
-//            Record key1 = record.key();
-//            if (key1.size() == 1) {
-//                return ((Record1<T>) key1).value1();
-//            }
-//            return (T) key1;
-//        });
+        return VertxDAOHelper.insertReturningPrimaryAsync(object,this,(query,keyConverter)->client().insertReturning(query).map(RXTool.toFunction(keyConverter)));
     }
 
 }

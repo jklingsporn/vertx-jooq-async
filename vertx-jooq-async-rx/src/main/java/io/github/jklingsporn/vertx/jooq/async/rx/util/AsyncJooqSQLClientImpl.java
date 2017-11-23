@@ -56,6 +56,16 @@ public class AsyncJooqSQLClientImpl implements AsyncJooqSQLClient {
                 );
     }
 
+    @Override
+    public Single<Long> insertReturning(Query query) {
+        return getConnection()
+                .flatMap(executeAndClose(sqlConnection ->
+                                sqlConnection
+                                        .rxUpdateWithParams(query.getSQL(), getBindValues(query))
+                                        .map(updateResult -> updateResult.getKeys().getLong(0)))
+                );
+    }
+
     private JsonArray getBindValues(Query query) {
         JsonArray bindValues = new JsonArray();
         for (Param<?> param : query.getParams().values()) {
