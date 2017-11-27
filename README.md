@@ -186,6 +186,7 @@ If you are new to jOOQ, I recommend to read the awesome [jOOQ documentation](htt
                       <interfaces>true</interfaces>
                       <daos>true</daos>
                       <fluentSetters>true</fluentSetters>
+                      <pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>
                   </generate>
 
 
@@ -205,8 +206,7 @@ See the [TestTool](https://github.com/jklingsporn/vertx-jooq-async/blob/master/v
 of how to setup the generator programmatically.
 
 # known issues
-- `insertReturningPrimary`-method is not implemented yet.
-- Only basic CRUD tested.
+- `insertReturningPrimary`-method only works for MySQL and numeric keys.
 - Only available for MySQL and Postgres.
 - Nobody can prevent you from calling one of the blocking `fetch`- or `execute`-methods on the VertxDAO or a jOOQ-query. If you
 do it, jOOQ will try to execute the query by itself using JDBC (if properly configured). So try to avoid it at any cost.
