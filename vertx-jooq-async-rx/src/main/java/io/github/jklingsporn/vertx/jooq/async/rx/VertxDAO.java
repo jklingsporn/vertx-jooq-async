@@ -77,7 +77,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @see #findById(Object)
      */
     default Single<P> findByIdAsync(T id) {
-        return VertxDAOHelper.findByIdAsync(id,getTable(),this::fetchOneAsync);
+        return VertxDAOHelper.applyConditionally(id,getTable(),this::fetchOneAsync);
     }
 
     /**
@@ -159,7 +159,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      */
     @SuppressWarnings("unchecked")
     default Single<Integer> deleteExecAsync(T id) {
-        return VertxDAOHelper.deleteExecAsync(id, getTable(), this::deleteExecAsync);
+        return VertxDAOHelper.applyConditionally(id, getTable(), this::deleteExecAsync);
     }
 
     /**

@@ -90,7 +90,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @see #findById(Object)
      */
     default void findByIdAsync(T id, Handler<AsyncResult<P>> resultHandler){
-        VertxDAOHelper.findByIdAsync(id, getTable(), condition -> {
+        VertxDAOHelper.applyConditionally(id, getTable(), condition -> {
             fetchOneAsync(condition, resultHandler);
             return null;
         });
@@ -171,7 +171,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
     default void deleteExecAsync(T id, Handler<AsyncResult<Integer>> resultHandler){
-        VertxDAOHelper.deleteExecAsync(id, getTable(), condition -> {
+        VertxDAOHelper.applyConditionally(id, getTable(), condition -> {
             deleteExecAsync(condition, resultHandler);
             return null;
         });
