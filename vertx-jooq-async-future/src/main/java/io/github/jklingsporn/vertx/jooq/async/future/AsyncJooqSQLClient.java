@@ -21,18 +21,18 @@ public interface AsyncJooqSQLClient {
 
     /**
      *
-     * @param query
-     * @param mapper
-     * @param <P>
-     * @return
+     * @param query a jOOQ-query
+     * @param mapper a function to map the result into another object.
+     * @param <P> the type to fetch
+     * @return A CompletableFuture returning a List of P.
      */
     <P> CompletableFuture<List<P>> fetch(Query query, Function<JsonObject, P> mapper);
 
     /**
      * @param query a jOOQ-query
      * @param mapper a function to map the result into another object.
-     * @param <P>
-     * @return A CompletableFuture returning on object of P or <code>null</code>.
+     * @param <P> the type to fetch
+     * @return A CompletableFuture returning an object of P or <code>null</code>.
      */
     <P> CompletableFuture<P> fetchOne(Query query, Function<JsonObject, P> mapper);
 

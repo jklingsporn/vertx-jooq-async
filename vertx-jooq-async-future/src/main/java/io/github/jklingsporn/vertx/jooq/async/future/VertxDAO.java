@@ -47,7 +47,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @see #count()
      */
     default CompletableFuture<Long> countAsync(){
-        return VertxDAOHelper.countAsync(this,client()::fetchOne).thenApply(opt -> (Long) opt.get());
+        return VertxDAOHelper.countAsync(this, client()::fetchOne).thenApply(opt -> (Long) opt.get());
     }
 
     /**
@@ -77,6 +77,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      *
      * @param field The field to compare value against
      * @param value The accepted value
+     * @param <Z> the value type
      * @return CompletableFuture which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      * @see #fetchOne(Field, Object)
@@ -93,7 +94,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception,
      *                      e.g. when more than one result is returned.
      */
-    default <Z> CompletableFuture<P> fetchOneAsync(Condition condition){
+    default CompletableFuture<P> fetchOneAsync(Condition condition){
         return client().fetchOne(DSL.using(configuration()).selectFrom(getTable()).where(condition), jsonMapper());
     }
 
@@ -102,6 +103,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      *
      * @param field The field to compare value against
      * @param value The accepted value
+     * @param <Z> the value type
      * @return CompletableFuture which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      * @see #fetchOptional(Field, Object)
@@ -115,6 +117,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      *
      * @param field The field to compare values against
      * @param values The accepted values
+     * @param <Z> the value type
      * @return CompletableFuture which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
@@ -149,6 +152,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * Performs an async <code>DELETE</code> statement for a given condition and passes the number of affected rows
      * to the returned <code>CompletableFuture</code>.
      * @param condition The condition for the delete query
+     * @param <Z> the value type
      * @return CompletableFuture which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
@@ -161,7 +165,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * to the returned <code>CompletableFuture</code>.
      * @param field the field
      * @param value the value
-     * @param <Z>
+     * @param <Z> the value type
      * @return CompletableFuture which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
@@ -177,7 +181,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
     default CompletableFuture<Integer> updateExecAsync(P object){
-        return VertxDAOHelper.updateExecAsync(object,this, query->client().execute(query));
+        return VertxDAOHelper.updateExecAsync(object, this, query->client().execute(query));
     }
 
     /**
@@ -188,7 +192,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
     default CompletableFuture<Integer> insertExecAsync(P object){
-        return VertxDAOHelper.insertExecAsync(object,this,query->client().execute(query));
+        return VertxDAOHelper.insertExecAsync(object, this, query->client().execute(query));
     }
 
     /**

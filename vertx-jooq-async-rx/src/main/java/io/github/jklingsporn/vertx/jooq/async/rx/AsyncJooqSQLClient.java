@@ -20,19 +20,18 @@ public interface AsyncJooqSQLClient {
     }
 
     /**
-     *
-     * @param query
-     * @param mapper
-     * @param <P>
-     * @return
+     * @param query a jOOQ-query
+     * @param mapper a function to map the result into another object.
+     * @param <P> the type to fetch
+     * @return A Single returning a List of P.
      */
     <P> Single<List<P>> fetch(Query query, Function<JsonObject, P> mapper);
 
     /**
      * @param query a jOOQ-query
      * @param mapper a function to map the result into another object.
-     * @param <P>
-     * @return A Single returning on object of P or <code>null</code>.
+     * @param <P> the type to fetch
+     * @return A Single returning an object of P or <code>null</code>.
      */
     <P> Single<P> fetchOne(Query query, Function<JsonObject, P> mapper);
 

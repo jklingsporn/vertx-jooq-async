@@ -103,6 +103,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @param value The accepted value
      * @param resultHandler the resultHandler which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
+     * @param <Z> the value type
      * @see #fetchOne(Field, Object)
      */
     default <Z> void fetchOneAsync(Field<Z> field, Z value, Handler<AsyncResult<P>> resultHandler){
@@ -111,10 +112,10 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
 
     /**
      * Find a unique record by a given condition asynchronously.
-     *
      * @param condition the condition to fetch one value
      * @param resultHandler the resultHandler which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
+     * @param <Z> the value type
      */
     default <Z> void fetchOneAsync(Condition condition, Handler<AsyncResult<P>> resultHandler){
         client().fetchOne(DSL.using(configuration()).selectFrom(getTable()).where(condition), jsonMapper(),resultHandler);
@@ -128,6 +129,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @param value The accepted value
      * @param resultHandler the resultHandler which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
+     * @param <Z> the value type
      * @see #fetchOptional(Field, Object)
      */
     default <Z> void fetchOptionalAsync(Field<Z> field, Z value, Handler<AsyncResult<Optional<P>>> resultHandler){
@@ -147,6 +149,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @param values The accepted values
      * @param resultHandler the resultHandler which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
+     * @param <Z> the value type
      */
     default <Z> void fetchAsync(Field<Z> field, Collection<Z> values, Handler<AsyncResult<List<P>>> resultHandler){
         fetchAsync(field.in(values),resultHandler);
@@ -183,6 +186,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @param condition The condition for the delete query
      * @param resultHandler the resultHandler which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
+     * @param <Z> the value type
      */
     default <Z> void deleteExecAsync(Condition condition, Handler<AsyncResult<Integer>> resultHandler ){
         client().execute(DSL.using(configuration()).deleteFrom(getTable()).where(condition),resultHandler);
@@ -195,6 +199,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @param value the value
      * @param resultHandler the resultHandler which succeeds when the blocking method of this type succeeds or fails
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
+     * @param <Z> the value type
      */
     default <Z> void deleteExecAsync(Field<Z> field, Z value, Handler<AsyncResult<Integer>> resultHandler){
         deleteExecAsync(field.eq(value),resultHandler);
@@ -234,8 +239,8 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * to the <code>resultHandler</code>. When the value could not be inserted, the <code>resultHandler</code>
      * will fail.
      * @param object The POJO to be inserted
-     * @param resultHandler the resultHandler
-     * @throws UnsupportedOperationException in case of Postgres or when PK length > 1 or PK is not of type int or long
+     * @param resultHandler the resultHandler. In case of Postgres or when PK length is greater 1 or PK is not of
+     *                      type int or long, the resultHandler will be in error state.
      */
     default void insertReturningPrimaryAsync(P object, Handler<AsyncResult<T>> resultHandler){
         VertxDAOHelper.insertReturningPrimaryAsync(object,this, (query,fun)->{

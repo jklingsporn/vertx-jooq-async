@@ -22,18 +22,18 @@ public interface AsyncJooqSQLClient {
 
     /**
      *
-     * @param query
-     * @param mapper
-     * @param resultHandler
-     * @param <P>
+     * @param query a jOOQ-query
+     * @param mapper a function to map the result into another object.
+     * @param resultHandler A Handler containing the fetched results, each converted by the mapper.
+     * @param <P> the type to fetch
      */
     <P> void fetch(Query query, Function<JsonObject, P> mapper, Handler<AsyncResult<List<P>>> resultHandler);
 
     /**
      * @param query a jOOQ-query
      * @param mapper a function to map the result into another object.
-     * @param resultHandler
-     * @param <P>
+     * @param resultHandler A Handler containing the fetched result converted by the mapper.
+     * @param <P> the type to fetch
      */
     <P> void fetchOne(Query query, Function<JsonObject, P> mapper, Handler<AsyncResult<P>> resultHandler);
 
