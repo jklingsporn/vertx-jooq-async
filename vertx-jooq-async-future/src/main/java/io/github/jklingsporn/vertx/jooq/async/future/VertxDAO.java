@@ -198,7 +198,6 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @param object The POJO to be inserted
      * @return CompletableFuture
      */
-    @SuppressWarnings("unchecked")
     default CompletableFuture<T> insertReturningPrimaryAsync(P object){
         return VertxDAOHelper.insertReturningPrimaryAsync(object, this, (query,keyConverter)-> client().insertReturning(query).thenApply(keyConverter));
     }

@@ -220,7 +220,6 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @param object The POJO to be inserted
      * @return the Single
      */
-    @SuppressWarnings("unchecked")
     default Single<T> insertReturningPrimaryAsync(P object) {
         return VertxDAOHelper.insertReturningPrimaryAsync(object,this,(query,keyConverter)->client().insertReturning(query).map(RXTool.toFunction(keyConverter)));
     }
