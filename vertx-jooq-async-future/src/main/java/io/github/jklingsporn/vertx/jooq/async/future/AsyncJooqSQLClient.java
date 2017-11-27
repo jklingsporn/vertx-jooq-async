@@ -42,6 +42,10 @@ public interface AsyncJooqSQLClient {
      */
     CompletableFuture<Integer> execute(Query query);
 
+    /**
+     * @param query a jOOQ-query to run the insert
+     * @return A CompletableFuture returning the last inserted id provided by mysql
+     */
     CompletableFuture<Long> insertReturning(Query query);
 
     /**

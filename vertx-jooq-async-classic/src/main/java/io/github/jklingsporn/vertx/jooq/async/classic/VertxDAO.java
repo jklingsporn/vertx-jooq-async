@@ -59,14 +59,16 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @see #count()
      */
     default void countAsync(Handler<AsyncResult<Long>> resultHandler){
-        client().fetchOne(DSL.using(configuration()).selectCount().from(getTable()),
-                json -> json.getMap().values().stream().findFirst(), h -> {
-                    if (h.succeeded()) {
-                        resultHandler.handle(Future.succeededFuture((Long) h.result().get()));
-                    } else {
-                        resultHandler.handle(Future.failedFuture(h.cause()));
-                    }
-                });
+        VertxDAOHelper.countAsync(this, (query,mapper)->{
+            client().fetchOne(query,mapper, h -> {
+                if (h.succeeded()) {
+                    resultHandler.handle(Future.succeededFuture((Long) h.result().get()));
+                } else {
+                    resultHandler.handle(Future.failedFuture(h.cause()));
+                }
+            });
+            return null;
+        });
     }
 
     /**
@@ -221,8 +223,10 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      *                      with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
     default void insertExecAsync(P object, Handler<AsyncResult<Integer>> resultHandler){
-        DSLContext dslContext = DSL.using(configuration());
-        client().execute(dslContext.insertInto(getTable()).values(dslContext.newRecord(getTable(), object).intoMap().values()), resultHandler);
+        VertxDAOHelper.insertExecAsync(object, this, query -> {
+            client().execute(query,resultHandler);
+            return null;
+        });
     }
 
     /**

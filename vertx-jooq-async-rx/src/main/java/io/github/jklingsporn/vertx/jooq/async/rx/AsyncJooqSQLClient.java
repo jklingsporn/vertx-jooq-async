@@ -42,6 +42,10 @@ public interface AsyncJooqSQLClient {
      */
     Single<Integer> execute(Query query);
 
+    /**
+     * @param query a jOOQ-query to run the insert statement
+     * @return A Single returning the lastId returned by mysql.
+     */
     Single<Long> insertReturning(Query query);
 
     /**

@@ -43,6 +43,10 @@ public interface AsyncJooqSQLClient {
      */
     void execute(Query query, Handler<AsyncResult<Integer>> resultHandler);
 
+    /**
+     * @param query a jooq-query to run the insert
+     * @param resultHandler A Handler containing the last inserted id returned by mysql
+     */
     void insertReturning(Query query, Handler<AsyncResult<Long>> resultHandler);
 
     /**

@@ -34,6 +34,13 @@ public class RXTool {
         return Single.error(e);
     }
 
+    /**
+     * Converts a java.util.function into a io.reactivex.functions.Function.
+     * @param f the java function
+     * @param <T>
+     * @param <R>
+     * @return the reactivex Function
+     */
     public static <T,R> io.reactivex.functions.Function<T,R> toFunction(Function<T,R> f){
         return f::apply;
     }

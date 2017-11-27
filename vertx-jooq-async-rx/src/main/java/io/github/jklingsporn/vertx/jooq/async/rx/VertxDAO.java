@@ -6,7 +6,10 @@ import io.github.jklingsporn.vertx.jooq.async.shared.internal.VertxDAOHelper;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DAO;
+import org.jooq.Field;
+import org.jooq.UpdatableRecord;
 import org.jooq.impl.DSL;
 
 import java.util.Collection;
@@ -50,9 +53,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * @see #count()
      */
     default Single<Long> countAsync() {
-        return client().fetchOne(DSL.using(configuration()).selectCount().from(getTable()),
-                json -> json.getMap().values().stream().findFirst()).
-                map(opt -> (Long) opt.get());
+        return VertxDAOHelper.countAsync(this, client()::fetchOne).map(opt -> (Long) opt.get());
     }
 
     /**
@@ -208,7 +209,7 @@ public interface VertxDAO<R extends UpdatableRecord<R>, P extends VertxPojo, T> 
      * with an <code>DataAccessException</code> if the blocking method of this type throws an exception
      */
     default Single<Integer> insertExecAsync(P object) {
-        return client().execute(DSL.using(configuration()).insertInto(getTable()).values(object.toJson().getMap().values()));
+        return VertxDAOHelper.insertExecAsync(object, this, query->client().execute(query));
     }
 
     /**
