@@ -1,3 +1,14 @@
+# deprecation warning
+I started vertx-jooq-async a couple months after working on [vertx-jooq](https://github.com/jklingsporn/vertx-jooq) to allow the same
+features but using the async driver. First, I tried to incorproate it into vertx-jooq but it couldn't be done without a major
+refactoring (which I didn't have the time for), so I created this repository. In the following weeks it bothered me more and more,
+that I had to fix each bug, it had to be done two times. Also both projects shared a similar API: again a lot of duplicate code.
+
+In the last weeks I finally found some time to refactor vertx-jooq so it incorporates now both, the JDBC and the async driver.
+**Because of that, vertx-jooq-async will no longer be maintained.**
+
+
+
 # vertx-jooq-async
 The _real_ async version of [vertx-jooq](https://github.com/jklingsporn/vertx-jooq): a [jOOQ](http://www.jooq.org/)-CodeGenerator to create [vertx](http://vertx.io/)-ified DAOs and POJOs!
 This time with a [_real_ asynchronous driver](https://github.com/mauricio/postgresql-async). That's right - no JDBC.
