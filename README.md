@@ -2,7 +2,7 @@
 I started vertx-jooq-async a couple months after working on [vertx-jooq](https://github.com/jklingsporn/vertx-jooq) to allow the same
 features but using the async driver. First, I tried to incorproate it into vertx-jooq but it couldn't be done without a major
 refactoring (which I didn't have the time for), so I created this repository. In the following weeks it bothered me more and more,
-that I had to fix each bug, it had to be done two times. Also both projects shared a similar API: again a lot of duplicate code.
+that if I had to fix a bug, it had to be done two times. Also both projects shared a similar API: again a lot of duplicate code.
 
 In the last weeks I finally found some time to refactor vertx-jooq so it incorporates now both, the JDBC and the async driver.
 **Because of that, vertx-jooq-async will no longer be maintained.**
